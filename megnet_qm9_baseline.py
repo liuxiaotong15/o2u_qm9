@@ -1,9 +1,13 @@
+import os
+
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+
 from ase.db import connect
 from ase.io import read, write
 # from ase.visualize import view
 import random
 import pymatgen.io.ase as pymatgen_io_ase
-import os
 import numpy as np
 
 from megnet.models import MEGNetModel
@@ -42,13 +46,27 @@ def get_data_pp(idx, type):
     prop = prop.reshape(shape)
     return prop
 
+def add_noise(clean_data):
+    noise = 0
+    # 10% probability to increase or decrease 5%
+    prop = 0.1
+    noise_ratio = 0.05
+    r = random.random()
+    if r < prop/2:
+        noise = clean_data * noise_ratio 
+    elif r < prop:
+        noise = -1 * clean_data * noise_ratio
+    else:
+        pass
+    return clean_data + noise
+
 def cvt_ase2pymatgen(atoms):
     atoms.set_cell(100 * np.identity(3)) # if don't set_cell, later converter will crash..
     return(pymatgen_io_ase.AseAtomsAdaptor.get_structure(atoms))
 
 for row in rows:
     structures.append(cvt_ase2pymatgen(row.toatoms()))
-    targets.append(get_data_pp(row.id, G))
+    targets.append(add_noise(get_data_pp(row.id, G)))
 
 print(len(structures), len(targets))
 
@@ -67,6 +85,6 @@ INTENSIVE = False # U0 is an extensive quantity
 scaler = StandardScaler.from_training_data(structures, targets, is_intensive=INTENSIVE)
 model.target_scaler = scaler
 
-model.train(structures, targets, epochs=500, verbose=2)
+model.train(structures, targets, epochs=100, verbose=2)
 
 print('finish..')
