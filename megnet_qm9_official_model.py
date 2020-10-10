@@ -28,13 +28,13 @@ import numpy as np
 
 gc = CrystalGraph(bond_converter=GaussianDistance(
         np.linspace(0, 5, 100), 0.5), cutoff=4)
-model = MEGNetModel(100, 2, graph_converter=gc)
+model = MEGNetModel(100, 2, graph_converter=gc, lr=1e-3)
 
 INTENSIVE = False # U0 is an extensive quantity
 scaler = StandardScaler.from_training_data(train_structures, train_targets, is_intensive=INTENSIVE)
 model.target_scaler = scaler
 
-model.train(train_structures, train_targets, epochs=10, verbose=2)
+model.train(train_structures, train_targets, epochs=500, verbose=2)
 
 predicted_tests = []
 for i in test_structures:
