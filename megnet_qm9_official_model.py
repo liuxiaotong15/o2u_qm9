@@ -10,6 +10,8 @@ from pymatgen import Molecule
 
 qm9_ids = list(data.keys())
 
+print('qm9 len is: ', len(qm9_ids))
+
 molecules = [Molecule.from_dict(data[i]['molecule']) for i in qm9_ids]  # this gives a list of pymatgen Molecule
 
 structures = molecules
