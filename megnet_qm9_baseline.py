@@ -76,6 +76,9 @@ from megnet.models import MEGNetModel
 from megnet.data.graph import GaussianDistance
 from megnet.data.crystal import CrystalGraph
 from megnet.utils.preprocessing import StandardScaler
+
+from megnet.callbacks import ReduceLRUponNan, ManualStop, XiaotongCB
+
 import numpy as np
 
 gc = CrystalGraph(bond_converter=GaussianDistance(
@@ -85,6 +88,9 @@ INTENSIVE = False # U0 is an extensive quantity
 scaler = StandardScaler.from_training_data(structures, targets, is_intensive=INTENSIVE)
 model.target_scaler = scaler
 
-model.train(structures, targets, epochs=100, verbose=2)
+callbacks = [ReduceLRUponNan(patience=500), ManualStop(), XiaotongCB()]
+
+
+model.train(structures, targets, epochs=100, verbose=2, callbacks=callbacks)
 
 print('finish..')
