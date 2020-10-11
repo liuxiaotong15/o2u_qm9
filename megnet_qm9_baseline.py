@@ -70,6 +70,15 @@ for row in rows:
 
 print(len(structures), len(targets))
 
+import tensorflow as tf
+import tensorflow.keras.backend as K
+keras = tf.keras
+
+def examine_loss(y_true, y_pred):
+     result = keras.losses.mean_squared_error(y_true, y_pred)
+     result = K.print_tensor(result, message='losses')
+     return result
+
 # === megnet start === #
 
 from megnet.models import MEGNetModel
@@ -83,7 +92,7 @@ import numpy as np
 
 gc = CrystalGraph(bond_converter=GaussianDistance(
         np.linspace(0, 5, 100), 0.5), cutoff=4)
-model = MEGNetModel(100, 2, graph_converter=gc, lr=1e-3)
+model = MEGNetModel(100, 2, graph_converter=gc, lr=1e-3, loss=examine_loss)
 INTENSIVE = False # U0 is an extensive quantity
 scaler = StandardScaler.from_training_data(structures, targets, is_intensive=INTENSIVE)
 model.target_scaler = scaler

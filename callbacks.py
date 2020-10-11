@@ -260,6 +260,7 @@ class XiaotongCB(Callback):
                 str(float(kb.eval(self.model.optimizer.lr))) + \
                 'cur loss is: ' + str(self.losses[-1]))
         print('all loss is: ', self.losses)
+        print('logs: ', logs)
 
     def _reduce_lr_and_load(self, last_file):
         old_value = float(kb.eval(self.model.optimizer.lr))
