@@ -252,9 +252,14 @@ class XiaotongCB(Callback):
                             logger.info("Now lr is %s." % float(
                                 kb.eval(self.model.optimizer.lr)))
         
+        old_value = float(kb.eval(self.model.optimizer.lr))
+        self.model.reset_states()
+        self.model.optimizer.lr = old_value * self.factor
+
         print('xiaotong callback on epoch end ......., cur lr is: ' + \
-                float(kb.eval(self.model.optimizer.lr)) + \
-                'cur loss is: ' + self.losses[-1])
+                str(float(kb.eval(self.model.optimizer.lr))) + \
+                'cur loss is: ' + str(self.losses[-1]))
+        print('all loss is: ', self.losses)
 
     def _reduce_lr_and_load(self, last_file):
         old_value = float(kb.eval(self.model.optimizer.lr))

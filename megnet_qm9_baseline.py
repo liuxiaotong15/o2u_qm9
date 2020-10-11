@@ -88,7 +88,8 @@ INTENSIVE = False # U0 is an extensive quantity
 scaler = StandardScaler.from_training_data(structures, targets, is_intensive=INTENSIVE)
 model.target_scaler = scaler
 
-callbacks = [ReduceLRUponNan(patience=500), ManualStop(), XiaotongCB()]
+# callbacks = [ReduceLRUponNan(patience=500), ManualStop(), XiaotongCB()]
+callbacks = [ManualStop(), XiaotongCB()]
 
 
 model.train(structures, targets, epochs=100, verbose=2, callbacks=callbacks)
