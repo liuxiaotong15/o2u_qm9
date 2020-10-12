@@ -76,7 +76,7 @@ keras = tf.keras
 
 def examine_loss(y_true, y_pred):
      result = keras.losses.mean_squared_error(y_true, y_pred)
-     result = K.print_tensor(result, message='losses')
+     # result = K.print_tensor(result, message='losses')
      return result
 
 # === megnet start === #
@@ -92,14 +92,25 @@ import numpy as np
 
 gc = CrystalGraph(bond_converter=GaussianDistance(
         np.linspace(0, 5, 100), 0.5), cutoff=4)
-model = MEGNetModel(100, 2, graph_converter=gc, lr=1e-3, loss=examine_loss)
+model = MEGNetModel(100, 2, graph_converter=gc, lr=1e-3, loss=examine_loss) # , metrics=[examine_loss])
 INTENSIVE = False # U0 is an extensive quantity
 scaler = StandardScaler.from_training_data(structures, targets, is_intensive=INTENSIVE)
 model.target_scaler = scaler
 
 # callbacks = [ReduceLRUponNan(patience=500), ManualStop(), XiaotongCB()]
-callbacks = [ManualStop(), XiaotongCB()]
 
+# change structures to megnet predictable structures
+mp_strs = []
+
+train_graphs, train_targets = model.get_all_graphs_targets(structures, targets)
+train_nb_atoms = [len(i['atom']) for i in train_graphs]
+train_targets = [model.target_scaler.transform(i, j) for i, j in zip(train_targets, train_nb_atoms)]
+
+
+for s in structures:
+    mp_strs.append(model.graph_converter.graph_to_input(model.graph_converter.convert(s)))
+    
+callbacks = [ManualStop(), XiaotongCB((mp_strs, train_targets))]
 
 model.train(structures, targets, epochs=100, verbose=2, callbacks=callbacks)
 

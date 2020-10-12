@@ -167,6 +167,7 @@ class XiaotongCB(Callback):
     """
 
     def __init__(self,
+                 valid_data,
                  filepath: str = './callback/val_mae_{epoch:05d}_{val_mae:.6f}.hdf5',
                  factor: float = 0.5,
                  verbose: bool = True,
@@ -193,6 +194,7 @@ class XiaotongCB(Callback):
         self.losses: deque = deque([], maxlen=10)
         self.patience = patience
         self.monitor = monitor
+        self.valid_data = valid_data
         super().__init__()
 
         if mode == 'min':
@@ -256,11 +258,21 @@ class XiaotongCB(Callback):
         self.model.reset_states()
         self.model.optimizer.lr = old_value * self.factor
 
-        print('xiaotong callback on epoch end ......., cur lr is: ' + \
-                str(float(kb.eval(self.model.optimizer.lr))) + \
-                'cur loss is: ' + str(self.losses[-1]))
+        print(type(self.valid_data), len(self.valid_data[0]), len(self.valid_data[1]))
+        x_train = self.valid_data.__getitem__(0)
+        y_train = self.valid_data.__getitem__(1)
+        print(type(x_train), type(y_train))
+        pred = self.model.predict(x_train[:10])
+
+        print(pred[0], y_train[0])
+        print('xiaotong callback on epoch end ......., cur lr is: ', 
+                str(float(kb.eval(self.model.optimizer.lr))),
+                'cur loss is: ', str(self.losses[-1]))
         print('all loss is: ', self.losses)
         print('logs: ', logs)
+
+    # def on_batch_end(self, batch, logs):
+    #     print('batch_end logs: ', logs)
 
     def _reduce_lr_and_load(self, last_file):
         old_value = float(kb.eval(self.model.optimizer.lr))
