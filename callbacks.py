@@ -258,28 +258,27 @@ class XiaotongCB(Callback):
         self.model.reset_states()
         self.model.optimizer.lr = old_value * self.factor
 
-        print(type(self.valid_data), len(self.valid_data[0]), len(self.valid_data[1]))
+        # print(type(self.valid_data), len(self.valid_data[0]), len(self.valid_data[1]))
         x_train = self.valid_data[0]
         y_train = self.valid_data[1]
         
-        pred_batch_size = 1
 
         # if > 1 predict only return 1.... in my understanding, megnet only
         # predict 1 input once
 
+        x_train_gen = (y for y in x_train) # make a generator
+        
         losses = []
-        for i in range(len(x_train)//pred_batch_size):
-            batch_x_train = x_train[i*pred_batch_size: min(len(x_train), (i+1)*pred_batch_size)]
-            pred = self.model.predict(batch_x_train)
-            if i%10000 ==0:
-                print(type(pred), pred.shape, pred, y_train[i*pred_batch_size])
-            for j in range(pred.shape[0]):
-                losses.append((pred[j]-y_train[i*pred_batch_size+j])**2)
+        pred = self.model.predict(x_train_gen)
+        if 1:#i%10000 ==0:
+            print(type(pred), pred.shape, pred[0], y_train[0])
+        for j in range(pred.shape[0]):
+            losses.append((pred[j]-y_train[j])**2)
         print('len(losses): ', len(losses))
         print('sum(losses): ', sum(losses))
         print('sum/loss: ', sum(losses)/len(losses))
         import pickle
-        f = open('losses' + str(epoch) + '.txt', 'wb')
+        f = open('losses_gen_' + str(epoch) + '.txt', 'wb')
         pickle.dump(losses, f)
         f.close()
 

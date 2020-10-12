@@ -1,7 +1,7 @@
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 from ase.db import connect
 from ase.io import read, write
@@ -109,7 +109,7 @@ train_targets = [model.target_scaler.transform(i, j) for i, j in zip(train_targe
 
 for s in structures:
     mp_strs.append(model.graph_converter.graph_to_input(model.graph_converter.convert(s)))
-    
+
 callbacks = [ManualStop(), XiaotongCB((mp_strs, train_targets))]
 
 model.train(structures, targets, epochs=100, verbose=2, callbacks=callbacks)
