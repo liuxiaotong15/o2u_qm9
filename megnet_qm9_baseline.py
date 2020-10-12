@@ -26,7 +26,7 @@ np.random.seed(seed)
 filename = 'qm9.db'
 
 db = connect(filename)
-# rows = list(db.select("id<100", sort='id'))
+# rows = list(db.select("id<500", sort='id'))
 rows = list(db.select(sort='id'))
 MODEL_NAME = 'G'
 structures = []
