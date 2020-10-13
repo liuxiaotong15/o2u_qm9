@@ -119,6 +119,6 @@ for s in structures:
 
 callbacks = [ManualStop(), XiaotongCB((mp_strs, train_targets), commit_id)]
 
-model.train(structures, targets, epochs=100, verbose=2, callbacks=callbacks)
+model.train(structures, targets, epochs=50, verbose=2, callbacks=callbacks)
 
 print('finish..')

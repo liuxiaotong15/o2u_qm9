@@ -256,9 +256,10 @@ class XiaotongCB(Callback):
                             logger.info("Now lr is %s." % float(
                                 kb.eval(self.model.optimizer.lr)))
         
-        old_value = float(kb.eval(self.model.optimizer.lr))
-        self.model.reset_states()
-        self.model.optimizer.lr = old_value * self.factor
+        ########### learning rate decrease #################
+        # old_value = float(kb.eval(self.model.optimizer.lr))
+        # self.model.reset_states()
+        # self.model.optimizer.lr = old_value * self.factor
 
         # print(type(self.valid_data), len(self.valid_data[0]), len(self.valid_data[1]))
         x_train = self.valid_data[0]
