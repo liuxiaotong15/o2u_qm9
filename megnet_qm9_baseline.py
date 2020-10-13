@@ -51,8 +51,8 @@ def get_data_pp(idx, type):
 def add_noise(clean_data):
     noise = 0
     # 10% probability to increase or decrease 5%
-    prop = 0.1
-    noise_ratio = 0.0
+    prop = 0.2
+    noise_ratio = 0.01
     r = random.random()
     if r < prop/2:
         noise = clean_data * noise_ratio 
