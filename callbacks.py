@@ -168,6 +168,7 @@ class XiaotongCB(Callback):
 
     def __init__(self,
                  valid_data,
+                 commit_id,
                  filepath: str = './callback/val_mae_{epoch:05d}_{val_mae:.6f}.hdf5',
                  factor: float = 0.5,
                  verbose: bool = True,
@@ -195,6 +196,7 @@ class XiaotongCB(Callback):
         self.patience = patience
         self.monitor = monitor
         self.valid_data = valid_data
+        self.commit_id = commit_id
         super().__init__()
 
         if mode == 'min':
@@ -270,15 +272,14 @@ class XiaotongCB(Callback):
         
         losses = []
         pred = self.model.predict(x_train_gen)
-        if 1:#i%10000 ==0:
-            print(type(pred), pred.shape, pred[0], y_train[0])
+        
         for j in range(pred.shape[0]):
             losses.append((pred[j]-y_train[j])**2)
         print('len(losses): ', len(losses))
         print('sum(losses): ', sum(losses))
         print('sum/loss: ', sum(losses)/len(losses))
         import pickle
-        f = open('losses_gen_' + str(epoch) + '.txt', 'wb')
+        f = open('losses_' + self.commit_id + '_' + str(epoch) + '.txt', 'wb')
         pickle.dump(losses, f)
         f.close()
 

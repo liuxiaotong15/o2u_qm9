@@ -24,7 +24,9 @@ seed = 1234
 random.seed(seed)
 np.random.seed(seed)
 filename = 'qm9.db'
+commit_id = str(os.popen('git --no-pager log -1 --oneline').read())
 
+print('commit_id is: ', commit_id)
 db = connect(filename)
 # rows = list(db.select("id<500", sort='id'))
 rows = list(db.select(sort='id'))
@@ -110,7 +112,7 @@ train_targets = [model.target_scaler.transform(i, j) for i, j in zip(train_targe
 for s in structures:
     mp_strs.append(model.graph_converter.graph_to_input(model.graph_converter.convert(s)))
 
-callbacks = [ManualStop(), XiaotongCB((mp_strs, train_targets))]
+callbacks = [ManualStop(), XiaotongCB((mp_strs, train_targets), commit_id)]
 
 model.train(structures, targets, epochs=100, verbose=2, callbacks=callbacks)
 
