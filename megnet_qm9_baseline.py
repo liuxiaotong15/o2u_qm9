@@ -24,7 +24,7 @@ seed = 1234
 random.seed(seed)
 np.random.seed(seed)
 filename = 'qm9.db'
-commit_id = str(os.popen('git --no-pager log -1 --oneline').read())
+commit_id = str(os.popen('git --no-pager log -1 --oneline --pretty=format:"%h"').read())
 
 print('commit_id is: ', commit_id)
 db = connect(filename)
