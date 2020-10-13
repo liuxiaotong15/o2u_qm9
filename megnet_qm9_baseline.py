@@ -70,6 +70,11 @@ for row in rows:
     structures.append(cvt_ase2pymatgen(row.toatoms()))
     targets.append(add_noise(get_data_pp(row.id, G)))
 
+import pickle
+f = open('targets_' + commit_id + '.pickle', 'wb')
+pickle.dump(targets, f)
+f.close()
+
 print(len(structures), len(targets))
 
 import tensorflow as tf

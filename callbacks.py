@@ -279,7 +279,7 @@ class XiaotongCB(Callback):
         print('sum(losses): ', sum(losses))
         print('sum/loss: ', sum(losses)/len(losses))
         import pickle
-        f = open('losses_' + self.commit_id + '_' + str(epoch) + '.txt', 'wb')
+        f = open('losses_' + self.commit_id + '_' + str(epoch) + '.pickle', 'wb')
         pickle.dump(losses, f)
         f.close()
 
