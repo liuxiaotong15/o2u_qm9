@@ -1,7 +1,7 @@
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 from ase.db import connect
 from ase.io import read, write
@@ -52,7 +52,7 @@ def add_noise(clean_data):
     noise = 0
     # 10% probability to increase or decrease 5%
     prop = 0.1
-    noise_ratio = 0.05
+    noise_ratio = 0.0
     r = random.random()
     if r < prop/2:
         noise = clean_data * noise_ratio 
