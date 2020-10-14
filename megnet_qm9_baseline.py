@@ -48,7 +48,7 @@ def get_data_pp(idx, type):
     prop = prop.reshape(shape)
     return prop
 
-noise_prop = 0.2
+noise_prop = 0.1
 noise_cnt_half = int(len(rows) * noise_prop / 2)
 noise_ratio = 0.01
 noise_lst = [-1, 1] * noise_cnt_half + [0] * (len(rows) - noise_cnt_half*2)
