@@ -50,7 +50,7 @@ def get_data_pp(idx, type):
 
 noise_prop = 0.1
 noise_cnt_half = int(len(rows) * noise_prop / 2)
-noise_ratio = 0.01
+noise_ratio = 0.001
 noise_lst = [-1, 1] * noise_cnt_half + [0] * (len(rows) - noise_cnt_half*2)
 random.shuffle(noise_lst)
 
