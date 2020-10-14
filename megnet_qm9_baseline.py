@@ -1,7 +1,7 @@
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 from ase.db import connect
 from ase.io import read, write
@@ -48,19 +48,11 @@ def get_data_pp(idx, type):
     prop = prop.reshape(shape)
     return prop
 
-def add_noise(clean_data):
-    noise = 0
-    # 10% probability to increase or decrease 5%
-    prop = 0.2
-    noise_ratio = 0.01
-    r = random.random()
-    if r < prop/2:
-        noise = clean_data * noise_ratio 
-    elif r < prop:
-        noise = -1 * clean_data * noise_ratio
-    else:
-        pass
-    return clean_data + noise
+noise_prop = 0.2
+noise_cnt_half = int(len(rows) * noise_prop / 2)
+noise_ratio = 0.01
+noise_lst = [-1, 1] * noise_cnt_half + [0] * (len(rows) - noise_cnt_half*2)
+random.shuffle(noise_lst)
 
 def cvt_ase2pymatgen(atoms):
     atoms.set_cell(100 * np.identity(3)) # if don't set_cell, later converter will crash..
@@ -68,7 +60,8 @@ def cvt_ase2pymatgen(atoms):
 
 for row in rows:
     structures.append(cvt_ase2pymatgen(row.toatoms()))
-    targets.append(add_noise(get_data_pp(row.id, G)))
+    n = 1 + noise_ratio * noise_lst[row.id-1]
+    targets.append(get_data_pp(row.id, G) * n)
 
 import pickle
 f = open('targets_' + commit_id + '.pickle', 'wb')

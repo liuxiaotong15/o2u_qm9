@@ -42,10 +42,10 @@ def top_k_idx(filename):
     return np.array(ret)
 
 def handle_commit_id(cmt_id):
-    top_k_id_ans = top_k_idx("targets_" + cmt_id + ".pickle")
+    top_k_id_ans = top_k_idx("pickle_data/targets_" + cmt_id + ".pickle")
     for i in range(50):
         try:
-            loss = load_loss("losses_" + cmt_id + "_" + str(i) + ".pickle")
+            loss = load_loss("pickle_data/losses_" + cmt_id + "_" + str(i) + ".pickle")
         except:
             break
         else:
@@ -67,7 +67,7 @@ def handle_commit_id(cmt_id):
     print('-' * 30)
 
 if __name__ == "__main__":
-    for cmt in ['3ad9df1', '9a6632f']:
+    for cmt in ['a18d340', '3ad9df1', '9a6632f']:
         print(cmt, ":")
         handle_commit_id(cmt)
 
