@@ -48,7 +48,7 @@ def get_data_pp(idx, type):
     prop = prop.reshape(shape)
     return prop
 
-noise_prop = 0.1
+noise_prop = 0.0
 noise_cnt_half = int(len(rows) * noise_prop / 2)
 noise_ratio = 0.001
 noise_lst = [-1, 1] * noise_cnt_half + [0] * (len(rows) - noise_cnt_half*2)
@@ -92,7 +92,7 @@ import numpy as np
 
 gc = CrystalGraph(bond_converter=GaussianDistance(
         np.linspace(0, 5, 100), 0.5), cutoff=4)
-model = MEGNetModel(100, 2, graph_converter=gc, lr=1e-3, loss=examine_loss) # , metrics=[examine_loss])
+model = MEGNetModel(100, 2, graph_converter=gc, lr=1e-2, loss=examine_loss) # , metrics=[examine_loss])
 INTENSIVE = False # U0 is an extensive quantity
 scaler = StandardScaler.from_training_data(structures, targets, is_intensive=INTENSIVE)
 model.target_scaler = scaler
