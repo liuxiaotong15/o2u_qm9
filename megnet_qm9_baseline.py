@@ -1,7 +1,7 @@
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 from ase.db import connect
 from ase.io import read, write
@@ -92,7 +92,7 @@ import numpy as np
 
 gc = CrystalGraph(bond_converter=GaussianDistance(
         np.linspace(0, 5, 100), 0.5), cutoff=4)
-model = MEGNetModel(100, 2, graph_converter=gc, lr=1e-2, loss=examine_loss) # , metrics=[examine_loss])
+model = MEGNetModel(100, 2, graph_converter=gc, lr=1e-4, loss=examine_loss) # , metrics=[examine_loss])
 INTENSIVE = False # U0 is an extensive quantity
 scaler = StandardScaler.from_training_data(structures, targets, is_intensive=INTENSIVE)
 model.target_scaler = scaler
