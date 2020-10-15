@@ -26,6 +26,24 @@ print('4 data size is:', data_size)
 
 ### load exp data and shuffle
 
+test_structures = []
+test_targets = []
+
+data_path = 'data/all_data.json' # put here the path to the json file
+with open(data_path,'r') as fp:
+    d = json.load(fp)
+
+s = [Structure.from_dict(x['structure']) for x in d['ordered_exp'].values()]
+t = [x['band_gap'] for x in d['ordered_exp'].values()]
+
+for i in range(len(list(d['ordered_exp'].keys()))):
+    if random.random() > 0.5:
+        structures.append(s[i])
+        targets.append(t[i])
+    else:
+        test_structures.append(s[i])
+        test_targets.append(t[i])
+
 from megnet.data.crystal import CrystalGraph
 from megnet.data.graph import GaussianDistance
 from megnet.models import MEGNetModel
