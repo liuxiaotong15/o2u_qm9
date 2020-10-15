@@ -28,13 +28,19 @@ with MPRester("zBbeX4qitlXrl2uBfIP") as mpr:
     #         print(len(structures))
     # else:
     for i in range(len(pbe_keys)):
-        s1 = mpr.get_structure_by_material_id(pbe_keys[i])
-        # or
-        # data = mpr.query(criteria={"task_id": pbe_keys[i]}, properties=["final_energy", "cif"])
-        # s2 = CifParser.from_string(data[0]["cif"]).get_structures()
-        structures.append(s1.to(fmt="cif"))
-        if len(structures)%10 == 0:
-            print(len(structures))
+        try:
+            s1 = mpr.get_structure_by_material_id(pbe_keys[i])
+            # or
+            # data = mpr.query(criteria={"task_id": pbe_keys[i]}, properties=["final_energy", "cif"])
+            # s2 = CifParser.from_string(data[0]["cif"]).get_structures()
+        except:
+            print('something wrong with index:', i, 'mp id is: ', pbe_keys[i])
+            i -= 1
+        else:
+            structures.append(s1.to(fmt="cif"))
+            if len(structures)%10 == 0:
+                print(len(structures))
+
 
 # dump the data
 df_pbe = pd.DataFrame({'mp_id':list(d[task].keys()), task+'_gap':list(d[task].values()), task+'_structure':structures})
