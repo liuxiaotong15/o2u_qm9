@@ -5,6 +5,7 @@ import random
 
 seed = 1234
 random.seed(seed)
+np.random.seed(seed)
 
 items = ['pbe', 'hse', 'gllb-sc', 'scan']
 
@@ -37,27 +38,38 @@ s = [Structure.from_dict(x['structure']) for x in d['ordered_exp'].values()]
 t = [x['band_gap'] for x in d['ordered_exp'].values()]
 
 print('exp data size is:', len(s))
-
+data_size.append(0)
 for i in range(len(list(d['ordered_exp'].keys()))):
     if random.random() > 0.5:
         structures.append(s[i])
         targets.append(t[i])
+        data_size[-1]+=1
     else:
         test_structures.append(s[i])
         test_targets.append(t[i])
+
 
 from megnet.data.crystal import CrystalGraph
 from megnet.data.graph import GaussianDistance
 from megnet.models import MEGNetModel
 
-model = MEGNetModel(10, 2, nblocks=1, lr=1e-2,
+multi_step_training = True
+
+model = MEGNetModel(10, 2, nblocks=1, lr=1e-3,
         n1=4, n2=4, n3=4, npass=1, ntarget=1,
         graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 
-model.train(structures, targets, epochs=2)
-
-model.save_model('test.hdf5')
-model = MEGNetModel.from_file('test.hdf5')
+if multi_step_training:
+    idx = 0
+    for i in range(len(data_size)):
+        model.train(structures[idx:idx+data_size[i]], targets[idx:idx+data_size[i]], epochs=20)
+        idx += data_size[i]
+        # model.save_model('test.hdf5')
+        # model = MEGNetModel.from_file('test.hdf5')
+else:
+    model.train(structures, targets, epochs=100)
+    # model.save_model('test.hdf5')
+    # model = MEGNetModel.from_file('test.hdf5')
 
 ## model predict 
 MAE = 0
