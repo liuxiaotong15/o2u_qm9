@@ -28,7 +28,7 @@ while len(structures) < len(pbe_keys):
         #         structures += lst
         #         print(len(structures))
         # else:
-        for i in range(len(pbe_keys)):
+        for i in range(len(structures), len(pbe_keys)):
             try:
                 s1 = mpr.get_structure_by_material_id(pbe_keys[i])
                 # or
