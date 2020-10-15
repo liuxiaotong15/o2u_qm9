@@ -10,8 +10,13 @@ with open(data_path,'r') as fp:
 from pymatgen.ext.matproj import MPRester
 from pymatgen.io.cif import CifParser
 
+import sys
+
+items = ['pbe', 'hse', 'gllb-sc', 'scan']
+task = items[int(sys.argv[1])]
+
 structures = []
-pbe_keys = list(d['pbe'].keys())
+pbe_keys = list(d[task].keys())
 print(len(pbe_keys))
 batch_size = 1024
 
@@ -32,7 +37,7 @@ with MPRester("zBbeX4qitlXrl2uBfIP") as mpr:
             print(len(structures))
 
 # dump the data
-df_pbe = pd.DataFrame({'mp_id':list(d['pbe'].keys()), 'pbe_gap':list(d['pbe'].values()), 'pbe_structure':structures})
+df_pbe = pd.DataFrame({'mp_id':list(d[task].keys()), task+'_gap':list(d[task].values()), task+'_structure':structures})
 df_pbe.set_index('mp_id',inplace=True)
-df_pbe.to_csv('data/pbe.csv')
+df_pbe.to_csv('data/'+task+'.csv')
 
