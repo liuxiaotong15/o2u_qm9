@@ -53,23 +53,31 @@ from megnet.data.crystal import CrystalGraph
 from megnet.data.graph import GaussianDistance
 from megnet.models import MEGNetModel
 
-multi_step_training = True
+import sys
+
+training_mode = int(sys.argv[1])
 
 model = MEGNetModel(10, 2, nblocks=1, lr=1e-3,
         n1=4, n2=4, n3=4, npass=1, ntarget=1,
         graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 
-if multi_step_training:
+if training_mode == 0: # PBE -> HSE ... -> part EXP, one by one
     idx = 0
     for i in range(len(data_size)):
         model.train(structures[idx:idx+data_size[i]], targets[idx:idx+data_size[i]], epochs=20)
         idx += data_size[i]
         # model.save_model('test.hdf5')
         # model = MEGNetModel.from_file('test.hdf5')
-else:
+elif training_mode == 1: # all training set together
     model.train(structures, targets, epochs=100)
     # model.save_model('test.hdf5')
     # model = MEGNetModel.from_file('test.hdf5')
+elif trainning_mode == 2: # only part EXP
+    pass
+elif trainning_mode == 3: # all -> all-PBE -> all-PBE-HSE -> ... -> part EXP
+    pass
+else:
+    pass
 
 ## model predict 
 MAE = 0
