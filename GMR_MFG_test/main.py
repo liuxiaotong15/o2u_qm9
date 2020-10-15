@@ -36,6 +36,8 @@ with open(data_path,'r') as fp:
 s = [Structure.from_dict(x['structure']) for x in d['ordered_exp'].values()]
 t = [x['band_gap'] for x in d['ordered_exp'].values()]
 
+print('exp data size is:', len(s))
+
 for i in range(len(list(d['ordered_exp'].keys()))):
     if random.random() > 0.5:
         structures.append(s[i])
@@ -54,3 +56,16 @@ model = MEGNetModel(10, 2, nblocks=1, lr=1e-2,
 
 model.train(structures, targets, epochs=2)
 
+model.save_model('test.hdf5')
+model = MEGNetModel.from_file('test.hdf5')
+
+## model predict 
+MAE = 0
+test_size = len(test_structures)
+
+for i in range(test_size):
+    MAE += abs(model.predict_structure(test_structures[i]).ravel() - test_targets[i])
+
+MAE /= test_size
+
+print('MAE is:', MAE)
