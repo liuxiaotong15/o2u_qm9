@@ -3,6 +3,12 @@ import pandas as pd
 import numpy as np
 import random
 
+import os
+
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+ 
+
 seed = 1234
 random.seed(seed)
 np.random.seed(seed)
