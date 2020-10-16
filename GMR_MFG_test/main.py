@@ -61,24 +61,25 @@ model = MEGNetModel(10, 2, nblocks=1, lr=1e-3,
         n1=4, n2=4, n3=4, npass=1, ntarget=1,
         graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 
+ep = 100
+
 if training_mode == 0: # PBE -> HSE ... -> part EXP, one by one
     idx = 0
     for i in range(len(data_size)):
-        model.train(structures[idx:idx+data_size[i]], targets[idx:idx+data_size[i]], epochs=20)
+        model.train(structures[idx:idx+data_size[i]], targets[idx:idx+data_size[i]], epochs=ep)
         idx += data_size[i]
         # model.save_model('test.hdf5')
         # model = MEGNetModel.from_file('test.hdf5')
 elif training_mode == 1: # all training set together
-    model.train(structures, targets, epochs=100)
+    model.train(structures, targets, epochs=ep*len(data_size))
     # model.save_model('test.hdf5')
     # model = MEGNetModel.from_file('test.hdf5')
 elif training_mode == 2: # only part EXP
-    model.train(structures[sum(data_size[0:len(data_size)-1]):], targets[sum(data_size[0:len(data_size)-1]):], epochs=100)
-    pass
+    model.train(structures[sum(data_size[0:len(data_size)-1]):], targets[sum(data_size[0:len(data_size)-1]):], epochs=ep*len(data_size))
 elif training_mode == 3: # all -> all-PBE -> all-PBE-HSE -> ... -> part EXP
     idx = 0
     for i in range(len(data_size)):
-        model.train(structures[idx:], targets[idx:], epochs=20)
+        model.train(structures[idx:], targets[idx:], epochs=ep)
         idx += data_size[i]
 else:
     pass
