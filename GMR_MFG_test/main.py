@@ -73,9 +73,13 @@ elif training_mode == 1: # all training set together
     # model.save_model('test.hdf5')
     # model = MEGNetModel.from_file('test.hdf5')
 elif trainning_mode == 2: # only part EXP
+    model.train(structures[sum(data_size[0:len(data_size)-1]):], targets[sum(data_size[0:len(data_size)-1]):], epochs=100)
     pass
 elif trainning_mode == 3: # all -> all-PBE -> all-PBE-HSE -> ... -> part EXP
-    pass
+    idx = 0
+    for i in range(len(data_size)):
+        model.train(structures[idx:], targets[idx:], epochs=20)
+        idx += data_size[i]
 else:
     pass
 
