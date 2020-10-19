@@ -3,6 +3,9 @@ import pandas as pd
 import numpy as np
 import random
 import tensorflow as tf
+
+tf.compat.v1.disable_eager_execution()
+
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -97,7 +100,7 @@ elif training_mode == 3: # all -> all-PBE -> all-PBE-HSE -> ... -> part EXP
         prediction(model)
 elif training_mode == 4: # use E1 as validation dataset, P -> H -> G -> S one by one
     idx = 0
-    callback = tf.keras.callbacks.EarlyStopping(patience=3, restore_best_weights=True)
+    callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=3, restore_best_weights=True)
     for i in range(len(data_size)-1):
         model.train(structures[idx:idx+data_size[i]], targets[idx:idx+data_size[i]],
                 validation_structures=structures[sum(data_size[:-1]):],
