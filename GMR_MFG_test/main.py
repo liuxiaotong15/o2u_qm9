@@ -2,7 +2,7 @@ import json
 import pandas as pd
 import numpy as np
 import random
-
+import tensorflow as tf
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -61,6 +61,14 @@ from megnet.models import MEGNetModel
 
 import sys
 
+def prediction(model):
+    MAE = 0
+    test_size = len(test_structures)
+    for i in range(test_size):
+        MAE += abs(model.predict_structure(test_structures[i]).ravel() - test_targets[i])
+    MAE /= test_size
+    print('MAE is:', MAE)
+
 training_mode = int(sys.argv[1])
 
 model = MEGNetModel(10, 2, nblocks=1, lr=1e-3,
@@ -74,29 +82,35 @@ if training_mode == 0: # PBE -> HSE ... -> part EXP, one by one
     for i in range(len(data_size)):
         model.train(structures[idx:idx+data_size[i]], targets[idx:idx+data_size[i]], epochs=ep)
         idx += data_size[i]
-        # model.save_model('test.hdf5')
-        # model = MEGNetModel.from_file('test.hdf5')
+        prediction(model)
 elif training_mode == 1: # all training set together
     model.train(structures, targets, epochs=ep*len(data_size))
-    # model.save_model('test.hdf5')
-    # model = MEGNetModel.from_file('test.hdf5')
+    prediction(model)
 elif training_mode == 2: # only part EXP
     model.train(structures[sum(data_size[0:len(data_size)-1]):], targets[sum(data_size[0:len(data_size)-1]):], epochs=ep*len(data_size))
+    prediction(model)
 elif training_mode == 3: # all -> all-PBE -> all-PBE-HSE -> ... -> part EXP
     idx = 0
     for i in range(len(data_size)):
         model.train(structures[idx:], targets[idx:], epochs=ep)
         idx += data_size[i]
+        prediction(model)
+elif training_mode == 4: # use E1 as validation dataset, P -> H -> G -> S one by one
+    idx = 0
+    callback = tf.keras.callbacks.EarlyStopping(patience=3, restore_best_weights=True)
+    for i in range(len(data_size)-1):
+        model.train(structures[idx:idx+data_size[i]], targets[idx:idx+data_size[i]],
+                validation_structures=structures[sum(data_size[:-1]):],
+                validation_targets=targets[sum(data_size[:-1]):],
+                callbacks=[callback],
+                epochs=ep)
+        idx += data_size[i]
+        prediction(model)
 else:
     pass
 
+## model save and load
+    # model.save_model('test.hdf5')
+    # model = MEGNetModel.from_file('test.hdf5')
 ## model predict 
-MAE = 0
-test_size = len(test_structures)
 
-for i in range(test_size):
-    MAE += abs(model.predict_structure(test_structures[i]).ravel() - test_targets[i])
-
-MAE /= test_size
-
-print('MAE is:', MAE)
