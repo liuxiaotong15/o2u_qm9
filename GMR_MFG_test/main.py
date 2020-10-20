@@ -4,12 +4,12 @@ import numpy as np
 import random
 import tensorflow as tf
 
-tf.compat.v1.disable_eager_execution()
+# tf.compat.v1.disable_eager_execution()
 
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
  
 
 seed = 1234
@@ -102,11 +102,14 @@ elif training_mode == 4: # use E1 as validation dataset, P -> H -> G -> S one by
     idx = 0
     callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=3, restore_best_weights=True)
     for i in range(len(data_size)-1):
+        print('vali dataset length: ', len(structures[sum(data_size[:-1]):]))
         model.train(structures[idx:idx+data_size[i]], targets[idx:idx+data_size[i]],
                 validation_structures=structures[sum(data_size[:-1]):],
                 validation_targets=targets[sum(data_size[:-1]):],
                 callbacks=[callback],
-                epochs=ep)
+                epochs=ep,
+                save_checkpoint=False,
+                automatic_correction=False)
         idx += data_size[i]
         prediction(model)
 elif training_mode == 5: # use more accuracy dataset as validation dataset, P -> H -> G -> S one by one
@@ -117,7 +120,9 @@ elif training_mode == 5: # use more accuracy dataset as validation dataset, P ->
                 validation_structures=structures[sum(data_size[:i+1]):],
                 validation_targets=targets[sum(data_size[:i+1]):],
                 callbacks=[callback],
-                epochs=ep)
+                epochs=ep,
+                save_checkpoint=False,
+                automatic_correction=False)
         idx += data_size[i]
         prediction(model)
 
