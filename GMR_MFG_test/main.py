@@ -9,7 +9,7 @@ import tensorflow as tf
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
  
 
 seed = 1234
@@ -28,7 +28,9 @@ for it in items:
     csv_name = 'data/' + it + '_cif.csv'
     df = pd.read_csv(csv_name)
     data_size.append(len(df))
-    for i in range(len(df)):
+    r = list(range(len(df)))
+    random.shuffle(r)
+    for i in r:
         structures.append(Structure.from_str(df[it+'_structure'][i], fmt='cif'))
         targets.append(df[it+'_gap'][i])
 
@@ -48,7 +50,9 @@ t = [x['band_gap'] for x in d['ordered_exp'].values()]
 
 print('exp data size is:', len(s))
 data_size.append(0)
-for i in range(len(list(d['ordered_exp'].keys()))):
+r = list(range(len(list(d['ordered_exp'].keys()))))
+random.shuffle(r)
+for i in r:
     if random.random() > 0.5:
         structures.append(s[i])
         targets.append(t[i])
@@ -78,7 +82,8 @@ model = MEGNetModel(10, 2, nblocks=1, lr=1e-3,
         n1=4, n2=4, n3=4, npass=1, ntarget=1,
         graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 
-ep = 100
+ep = 1000
+callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=50, restore_best_weights=True)
 
 if training_mode == 0: # PBE -> HSE ... -> part EXP, one by one
     idx = 0
@@ -100,7 +105,6 @@ elif training_mode == 3: # all -> all-PBE -> all-PBE-HSE -> ... -> part EXP
         prediction(model)
 elif training_mode == 4: # use E1 as validation dataset, P -> H -> G -> S one by one
     idx = 0
-    callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=3, restore_best_weights=True)
     for i in range(len(data_size)-1):
         print('vali dataset length: ', len(structures[sum(data_size[:-1]):]))
         model.train(structures[idx:idx+data_size[i]], targets[idx:idx+data_size[i]],
@@ -114,7 +118,6 @@ elif training_mode == 4: # use E1 as validation dataset, P -> H -> G -> S one by
         prediction(model)
 elif training_mode == 5: # use more accuracy dataset as validation dataset, P -> H -> G -> S one by one
     idx = 0
-    callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=3, restore_best_weights=True)
     for i in range(len(data_size)-1):
         model.train(structures[idx:idx+data_size[i]], targets[idx:idx+data_size[i]],
                 validation_structures=structures[sum(data_size[:i+1]):],
@@ -125,7 +128,58 @@ elif training_mode == 5: # use more accuracy dataset as validation dataset, P ->
                 automatic_correction=False)
         idx += data_size[i]
         prediction(model)
-
+elif training_mode == 6: # PBE -> HSE ... -> part EXP, one by one, with 20% validation
+    idx = 0
+    for i in range(len(data_size)):
+        model.train(structures[idx:idx+int(0.8*data_size[i])], targets[idx:idx+int(0.8*data_size[i])],
+                validation_structures=structures[idx+int(0.8*data_size[i]):(idx+data_size[i])],
+                validation_targets=targets[idx+int(0.8*data_size[i]):(idx+data_size[i])],
+                callbacks=[callback],
+                epochs=ep,
+                save_checkpoint=False,
+                automatic_correction=False)
+        idx += data_size[i]
+        prediction(model)
+elif training_mode == 7: # all training set together with 20% validation
+    l = len(structures)
+    c = list(zip(structures, targets))
+    random.shuffle(c)
+    structures, targets = zip(*c)
+    model.train(structures[:int(0.8 * l)], targets[:int(0.8 * l)],
+            validation_structures=structures[int(0.8 * l):],
+            validation_targets=targets[int(0.8 * l):],
+            callbacks=[callback],
+            epochs=ep*len(data_size),
+            save_checkpoint=False,
+            automatic_correction=False)
+    prediction(model)
+elif training_mode == 8: # only part EXP with 20% validation
+    model.train(structures[-1*data_size[-1]:int(-0.2*data_size[-1])], targets[-1*data_size[-1]:int(-0.2*data_size[-1])],
+            validation_structures=structures[int(-0.2*data_size[-1]):],
+            validation_targets=targets[int(-0.2*data_size[-1]):],
+            callbacks=[callback],
+            epochs=ep*len(data_size),
+            save_checkpoint=False,
+            automatic_correction=False)
+    prediction(model)
+elif training_mode == 9: # all -> all-PBE -> all-PBE-HSE -> ... -> part EXP with 20% validation
+    idx = 0
+    for i in range(len(data_size)):
+        s = structures[idx:]
+        t = targets[idx:]
+        c = list(zip(s, t))
+        random.shuffle(c)
+        s, t = zip(*c)
+        l = len(s)
+        model.train(s[:int(0.8*l)], t[:int(0.8*l)],
+                validation_structures=s[int(0.8*l):],
+                validation_targets=t[int(0.8*l):],
+                callbacks=[callback],
+                save_checkpoint=False,
+                automatic_correction=False,
+                epochs=ep)
+        idx += data_size[i]
+        prediction(model)
 else:
     pass
 
