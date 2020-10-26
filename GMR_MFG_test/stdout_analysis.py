@@ -12,16 +12,18 @@ font_legend = {'family' : 'Times New Roman',
 
 fig, ax = plt.subplots()
 
-commitid = '9d5a547'
-lgd = ['one by one', 'all together', 'only exp training', 'all->exp']
-for idx in [1, 3]:
+commitid = 'bc6af1e'
+# lgd = ['one by one', 'all together', 'only exp training', 'all->exp']
+lgd = {6: '0', 8: '1', 9: '2'}
+
+for idx in [6, 8, 9]:
     filename = commitid + "_" + str(idx) + ".log"
     y = []
     with open(filename, 'r') as f:
         for line in f:
             if 'step' in line:
                 # print(line)
-                result = re.match('.*step - loss: (.*)', line)
+                result = re.match('.*val_loss: (.*)', line)
                 if result:
                     # print(result.group(1))
                     y.append(float(result.group(1)))
