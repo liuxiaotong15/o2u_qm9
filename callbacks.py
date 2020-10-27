@@ -284,9 +284,9 @@ class XiaotongCB(Callback):
         # pickle.dump(losses, f)
         # f.close()
 
-        print('xiaotong callback on epoch end ......., cur lr is: ', 
-                str(float(kb.eval(self.model.optimizer.lr))),
-                'cur loss is: ', str(self.losses[-1]))
+        # print('xiaotong callback on epoch end ......., cur lr is: ', 
+        #         str(float(kb.eval(self.model.optimizer.lr))),
+        #         'cur loss is: ', str(self.losses[-1]))
         # print('all loss is: ', self.losses)
         # print('logs: ', logs)
 

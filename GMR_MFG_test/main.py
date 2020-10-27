@@ -9,7 +9,7 @@ import tensorflow as tf
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
  
 
 seed = 1234
@@ -145,7 +145,7 @@ elif training_mode == 6: # PBE -> HSE ... -> part EXP, one by one, with 20% vali
         model.train(structures[idx:idx+int(0.8*data_size[i])], targets[idx:idx+int(0.8*data_size[i])],
                 validation_structures=structures[idx+int(0.8*data_size[i]):(idx+data_size[i])],
                 validation_targets=targets[idx+int(0.8*data_size[i]):(idx+data_size[i])],
-                callbacks=[callback],
+                callbacks=[callback, XiaotongCB((test_input, test_targets), commit_id)],
                 epochs=ep,
                 save_checkpoint=False,
                 automatic_correction=False)
@@ -159,7 +159,7 @@ elif training_mode == 7: # all training set together with 20% validation
     model.train(structures[:int(0.8 * l)], targets[:int(0.8 * l)],
             validation_structures=structures[int(0.8 * l):],
             validation_targets=targets[int(0.8 * l):],
-            callbacks=[callback],
+            callbacks=[callback, XiaotongCB((test_input, test_targets), commit_id)],
             epochs=ep*len(data_size),
             save_checkpoint=False,
             automatic_correction=False)
@@ -168,7 +168,7 @@ elif training_mode == 8: # only part EXP with 20% validation
     model.train(structures[-1*data_size[-1]:int(-0.2*data_size[-1])], targets[-1*data_size[-1]:int(-0.2*data_size[-1])],
             validation_structures=structures[int(-0.2*data_size[-1]):],
             validation_targets=targets[int(-0.2*data_size[-1]):],
-            callbacks=[callback],
+            callbacks=[callback, XiaotongCB((test_input, test_targets), commit_id)],
             epochs=ep*len(data_size),
             save_checkpoint=False,
             automatic_correction=False)
