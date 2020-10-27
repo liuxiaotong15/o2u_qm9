@@ -275,20 +275,20 @@ class XiaotongCB(Callback):
         pred = self.model.predict(x_train_gen)
         
         for j in range(pred.shape[0]):
-            losses.append((pred[j]-y_train[j])**2)
-        print('len(losses): ', len(losses))
-        print('sum(losses): ', sum(losses))
-        print('sum/loss: ', sum(losses)/len(losses))
-        import pickle
-        f = open('losses_' + self.commit_id + '_' + str(epoch) + '.pickle', 'wb')
-        pickle.dump(losses, f)
-        f.close()
+            # losses.append((pred[j]-y_train[j])**2)
+            losses.append(abs(pred[j]-y_train[j]))
+        print('len(losses): ', len(losses), '; sum(losses): ', sum(losses))
+        print('avg_loss (MAE): ', sum(losses)/len(losses))
+        # import pickle
+        # f = open('losses_' + self.commit_id + '_' + str(epoch) + '.pickle', 'wb')
+        # pickle.dump(losses, f)
+        # f.close()
 
         print('xiaotong callback on epoch end ......., cur lr is: ', 
                 str(float(kb.eval(self.model.optimizer.lr))),
                 'cur loss is: ', str(self.losses[-1]))
-        print('all loss is: ', self.losses)
-        print('logs: ', logs)
+        # print('all loss is: ', self.losses)
+        # print('logs: ', logs)
 
     # def on_batch_end(self, batch, logs):
     #     print('batch_end logs: ', logs)

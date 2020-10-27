@@ -15,12 +15,16 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 seed = 1234
 random.seed(seed)
 np.random.seed(seed)
+commit_id = str(os.popen('git --no-pager log -1 --oneline --pretty=format:"%h"').read())
+
+print('commit_id is: ', commit_id)
 
 items = ['pbe', 'hse', 'gllb-sc', 'scan']
 
 structures = []
 targets = []
 data_size = []
+sample_weights = []
 
 from pymatgen.core.structure import Structure
 
@@ -33,6 +37,7 @@ for it in items:
     for i in r:
         structures.append(Structure.from_str(df[it+'_structure'][i], fmt='cif'))
         targets.append(df[it+'_gap'][i])
+        sample_weights.append(1.0/len(r))
 
 print('4 data size is:', data_size)
 
@@ -40,6 +45,7 @@ print('4 data size is:', data_size)
 
 test_structures = []
 test_targets = []
+test_input = []
 
 data_path = 'data/all_data.json' # put here the path to the json file
 with open(data_path,'r') as fp:
@@ -57,6 +63,7 @@ for i in r:
         structures.append(s[i])
         targets.append(t[i])
         data_size[-1]+=1
+        sample_weights.append(1.0)
     else:
         test_structures.append(s[i])
         test_targets.append(t[i])
@@ -65,6 +72,7 @@ for i in r:
 from megnet.data.crystal import CrystalGraph
 from megnet.data.graph import GaussianDistance
 from megnet.models import MEGNetModel
+from megnet.callbacks import XiaotongCB
 
 import sys
 
@@ -84,6 +92,9 @@ model = MEGNetModel(10, 2, nblocks=1, lr=1e-3,
 
 ep = 1000
 callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=50, restore_best_weights=True)
+
+for s in test_structures:
+    test_input.append(model.graph_converter.graph_to_input(model.graph_converter.convert(s)))
 
 if training_mode == 0: # PBE -> HSE ... -> part EXP, one by one
     idx = 0
@@ -162,21 +173,25 @@ elif training_mode == 8: # only part EXP with 20% validation
             save_checkpoint=False,
             automatic_correction=False)
     prediction(model)
-elif training_mode == 9: # all -> all-PBE -> all-PBE-HSE -> ... -> part EXP with 20% validation
+elif training_mode == 9 or training_mode == 10: # all -> all-PBE -> all-PBE-HSE -> ... -> part EXP with 20% validation
     idx = 0
     for i in range(len(data_size)):
         s = structures[idx:]
         t = targets[idx:]
-        c = list(zip(s, t))
+        sw = sample_weights[idx:]
+        c = list(zip(s, t, sw))
         random.shuffle(c)
-        s, t = zip(*c)
+        s, t, sw = zip(*c)
         l = len(s)
+        if training_mode == 9:
+            sw = None
         model.train(s[:int(0.8*l)], t[:int(0.8*l)],
                 validation_structures=s[int(0.8*l):],
                 validation_targets=t[int(0.8*l):],
-                callbacks=[callback],
+                callbacks=[callback, XiaotongCB((test_input, test_targets), commit_id)],
                 save_checkpoint=False,
                 automatic_correction=False,
+                sample_weights=sw,
                 epochs=ep)
         idx += data_size[i]
         prediction(model)
