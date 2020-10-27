@@ -277,8 +277,7 @@ class XiaotongCB(Callback):
         for j in range(pred.shape[0]):
             # losses.append((pred[j]-y_train[j])**2)
             losses.append(abs(pred[j]-y_train[j]))
-        print('len(losses): ', len(losses), '; sum(losses): ', sum(losses))
-        print('avg_loss (MAE): ', sum(losses)/len(losses))
+        print(' len(losses): ', len(losses), '; sum(losses): ', sum(losses), '; avg_loss (MAE): ', sum(losses)/len(losses))
         # import pickle
         # f = open('losses_' + self.commit_id + '_' + str(epoch) + '.pickle', 'wb')
         # pickle.dump(losses, f)
