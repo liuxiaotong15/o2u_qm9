@@ -64,17 +64,21 @@ c = list(zip(structures, targets))
 random.shuffle(c)
 structures, targets = zip(*c)
 
-noise_ratio = 0.01
+
 Q1_s = structures[:100000]
-Q1_t = targets[:100000]
-for i in range(len(Q1_t)):
-    Q1_t[i] *= (1 + noise_ratio)
+Q1_t = []
+Q1_tmp_t = targets[:100000]
 
-Q2_s = [100000:130000]
-Q2_t = [100000:130000]
+noise_ratio = 0.01
+for i in range(len(Q1_tmp_t)):
+    Q1_t.append(np.array(Q1_tmp_t[i] * (1 + noise_ratio)))
 
-Q3_s = [130000:]
-Q3_t = [130000:]
+
+Q2_s = structures[100000:130000]
+Q2_t = list(targets[100000:130000])
+
+Q3_s = structures[130000:]
+Q3_t = list(targets[130000:])
 
 # import pickle
 # f = open('targets_' + commit_id + '.pickle', 'wb')
@@ -92,8 +96,6 @@ from megnet.data.graph import GaussianDistance
 from megnet.data.crystal import CrystalGraph
 from megnet.utils.preprocessing import StandardScaler
 
-from megnet.callbacks import ReduceLRUponNan, ManualStop, XiaotongCB
-
 import numpy as np
 
 def prediction(model):
@@ -104,8 +106,8 @@ def prediction(model):
     MAE /= test_size
     print('MAE is:', MAE)
 
-train_s = Q1_s+Q2_s
-train_t = Q1_t+Q2_t
+train_s = Q1_s + Q2_s
+train_t = Q1_t + Q2_t
 
 gc = CrystalGraph(bond_converter=GaussianDistance(
         np.linspace(0, 5, 100), 0.5), cutoff=4)
@@ -117,6 +119,7 @@ model.target_scaler = scaler
 callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=50, restore_best_weights=True)
 
 idx = int(0.8 * len(train_s))
+
 
 model.train(train_s[:idx], train_t[:idx],
         validation_structures=train_s[idx:],
