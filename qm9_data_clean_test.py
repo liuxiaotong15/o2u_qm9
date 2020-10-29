@@ -30,7 +30,9 @@ print('commit_id is: ', commit_id)
 db = connect(filename)
 # rows = list(db.select("id<500", sort='id'))
 rows = list(db.select(sort='id'))
+
 MODEL_NAME = 'G'
+
 structures = []
 targets = []
 
@@ -48,11 +50,6 @@ def get_data_pp(idx, type):
     prop = prop.reshape(shape)
     return prop
 
-noise_prop = 0.0
-noise_cnt_half = int(len(rows) * noise_prop / 2)
-noise_ratio = 0.001
-noise_lst = [-1, 1] * noise_cnt_half + [0] * (len(rows) - noise_cnt_half*2)
-random.shuffle(noise_lst)
 
 def cvt_ase2pymatgen(atoms):
     atoms.set_cell(100 * np.identity(3)) # if don't set_cell, later converter will crash..
@@ -60,24 +57,33 @@ def cvt_ase2pymatgen(atoms):
 
 for row in rows:
     structures.append(cvt_ase2pymatgen(row.toatoms()))
-    n = 1 + noise_ratio * noise_lst[row.id-1]
-    targets.append(get_data_pp(row.id, G) * n)
+    targets.append(get_data_pp(row.id, G))
 
-import pickle
-f = open('targets_' + commit_id + '.pickle', 'wb')
-pickle.dump(targets, f)
-f.close()
+# shuffle data
+c = list(zip(structures, targets))
+random.shuffle(c)
+structures, targets = zip(*c)
 
-print(len(structures), len(targets))
+noise_ratio = 0.01
+Q1_s = structures[:100000]
+Q1_t = targets[:100000]
+for i in range(len(Q1_t)):
+    Q1_t[i] *= (1 + noise_ratio)
+
+Q2_s = [100000:130000]
+Q2_t = [100000:130000]
+
+Q3_s = [130000:]
+Q3_t = [130000:]
+
+# import pickle
+# f = open('targets_' + commit_id + '.pickle', 'wb')
+# pickle.dump(targets, f)
+# f.close()
 
 import tensorflow as tf
 import tensorflow.keras.backend as K
 keras = tf.keras
-
-def examine_loss(y_true, y_pred):
-     result = keras.losses.mean_squared_error(y_true, y_pred)
-     # result = K.print_tensor(result, message='losses')
-     return result
 
 # === megnet start === #
 
@@ -90,28 +96,37 @@ from megnet.callbacks import ReduceLRUponNan, ManualStop, XiaotongCB
 
 import numpy as np
 
+def prediction(model):
+    MAE = 0
+    test_size = len(Q3_s)
+    for i in range(test_size):
+        MAE += abs(model.predict_structure(Q3_s[i]).ravel() - Q3_t[i])
+    MAE /= test_size
+    print('MAE is:', MAE)
+
+train_s = Q1_s+Q2_s
+train_t = Q1_t+Q2_t
+
 gc = CrystalGraph(bond_converter=GaussianDistance(
         np.linspace(0, 5, 100), 0.5), cutoff=4)
-model = MEGNetModel(100, 2, graph_converter=gc, lr=1e-4, loss=examine_loss) # , metrics=[examine_loss])
+model = MEGNetModel(100, 2, graph_converter=gc, lr=1e-3)
 INTENSIVE = False # U0 is an extensive quantity
-scaler = StandardScaler.from_training_data(structures, targets, is_intensive=INTENSIVE)
+scaler = StandardScaler.from_training_data(train_s, train_t, is_intensive=INTENSIVE)
 model.target_scaler = scaler
 
-# callbacks = [ReduceLRUponNan(patience=500), ManualStop(), XiaotongCB()]
+callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=50, restore_best_weights=True)
 
-# change structures to megnet predictable structures
-mp_strs = []
+idx = int(0.8 * len(train_s))
 
-train_graphs, train_targets = model.get_all_graphs_targets(structures, targets)
-train_nb_atoms = [len(i['atom']) for i in train_graphs]
-train_targets = [model.target_scaler.transform(i, j) for i, j in zip(train_targets, train_nb_atoms)]
+model.train(train_s[:idx], train_t[:idx],
+        validation_structures=train_s[idx:],
+        validation_targets=train_t[idx:],
+        callbacks=[callback],
+        epochs=1000,
+        save_checkpoint=False,
+        automatic_correction=False)
 
 
-for s in structures:
-    mp_strs.append(model.graph_converter.graph_to_input(model.graph_converter.convert(s)))
+print('Training finish..')
 
-callbacks = [ManualStop(), XiaotongCB((mp_strs, train_targets), commit_id)]
-
-model.train(structures, targets, epochs=50, verbose=2, callbacks=callbacks)
-
-print('finish..')
+predict(model)
