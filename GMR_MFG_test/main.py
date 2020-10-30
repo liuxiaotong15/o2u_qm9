@@ -149,6 +149,7 @@ elif training_mode == 6: # PBE -> HSE ... -> part EXP, one by one, with 20% vali
                 epochs=ep,
                 save_checkpoint=False,
                 automatic_correction=False)
+        model.save_model(commit_id+'_'+str(training_mode)+'_'+str(i)+'.hdf5')
         idx += data_size[i]
         prediction(model)
 elif training_mode == 7: # all training set together with 20% validation
@@ -193,6 +194,7 @@ elif training_mode == 9 or training_mode == 10: # all -> all-PBE -> all-PBE-HSE 
                 automatic_correction=False,
                 sample_weights=sw,
                 epochs=ep)
+        model.save_model(commit_id+'_'+str(training_mode)+'_'+str(i)+'.hdf5')
         idx += data_size[i]
         prediction(model)
 elif training_mode == 11: # PBE -> HSE -> part EXP, one by one, with 20% validation (no G no S)
@@ -206,6 +208,7 @@ elif training_mode == 11: # PBE -> HSE -> part EXP, one by one, with 20% validat
                     epochs=ep,
                     save_checkpoint=False,
                     automatic_correction=False)
+            model.save_model(commit_id+'_'+str(training_mode)+'_'+str(i)+'.hdf5')
         idx += data_size[i]
         prediction(model)
 elif training_mode == 12: # all -> all-PBE -> all-PBE-HSE -> part EXP with 20% validation (no G no S)
@@ -227,6 +230,7 @@ elif training_mode == 12: # all -> all-PBE -> all-PBE-HSE -> part EXP with 20% v
                     automatic_correction=False,
                     sample_weights=sw,
                     epochs=ep)
+            model.save_model(commit_id+'_'+str(training_mode)+'_'+str(i)+'.hdf5')
         idx += data_size[i]
         prediction(model)
 
@@ -234,7 +238,7 @@ else:
     pass
 
 ## model save and load
-model.save_model(commit_id+str(training_mode)+'.hdf5')
+# model.save_model(commit_id+str(training_mode)+'.hdf5')
 # model = MEGNetModel.from_file('test.hdf5')
 ## model predict 
 
