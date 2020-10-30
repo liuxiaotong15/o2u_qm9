@@ -98,7 +98,7 @@ from megnet.utils.preprocessing import StandardScaler
 
 import numpy as np
 
-def prediction(model):
+def predict(model):
     MAE = 0
     test_size = len(Q3_s)
     for i in range(test_size):
