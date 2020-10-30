@@ -199,7 +199,7 @@ else:
     pass
 
 ## model save and load
-    # model.save_model('test.hdf5')
-    # model = MEGNetModel.from_file('test.hdf5')
+model.save_model(commit_id+str(training_mode)+'.hdf5')
+# model = MEGNetModel.from_file('test.hdf5')
 ## model predict 
 
