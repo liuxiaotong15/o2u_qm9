@@ -9,7 +9,7 @@ import tensorflow as tf
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
  
 
 seed = 1234
@@ -98,10 +98,10 @@ if False:
     idx = 0
     for sz in data_size[:-1]:
         ME = 0
-        for i in range(idx, idx + sz)
+        for i in range(idx, idx + sz):
             ME += (model.predict_structure(structures[i]).ravel() - targets[i])
         ME /= sz
-        for i in range(idx, idx + sz)
+        for i in range(idx, idx + sz):
             targets[i] += ME
         idx += sz
 
