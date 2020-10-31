@@ -9,7 +9,7 @@ import tensorflow as tf
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
  
 
 seed = 1234
@@ -19,7 +19,8 @@ commit_id = str(os.popen('git --no-pager log -1 --oneline --pretty=format:"%h"')
 
 print('commit_id is: ', commit_id)
 
-items = ['pbe', 'hse', 'gllb-sc', 'scan']
+# items = ['pbe', 'hse', 'gllb-sc', 'scan']
+items = ['pbe', 'hse']
 
 structures = []
 targets = []
@@ -197,43 +198,6 @@ elif training_mode == 9 or training_mode == 10: # all -> all-PBE -> all-PBE-HSE 
         model.save_model(commit_id+'_'+str(training_mode)+'_'+str(i)+'.hdf5')
         idx += data_size[i]
         prediction(model)
-elif training_mode == 11: # PBE -> HSE -> part EXP, one by one, with 20% validation (no G no S)
-    idx = 0
-    for i in range(len(data_size)):
-        if i > 2 and i < len(data_size) -1: 
-            model.train(structures[idx:idx+int(0.8*data_size[i])], targets[idx:idx+int(0.8*data_size[i])],
-                    validation_structures=structures[idx+int(0.8*data_size[i]):(idx+data_size[i])],
-                    validation_targets=targets[idx+int(0.8*data_size[i]):(idx+data_size[i])],
-                    callbacks=[callback, XiaotongCB((test_input, test_targets), commit_id)],
-                    epochs=ep,
-                    save_checkpoint=False,
-                    automatic_correction=False)
-            model.save_model(commit_id+'_'+str(training_mode)+'_'+str(i)+'.hdf5')
-        idx += data_size[i]
-        prediction(model)
-elif training_mode == 12: # all -> all-PBE -> all-PBE-HSE -> part EXP with 20% validation (no G no S)
-    idx = 0
-    for i in range(len(data_size)):
-        s = structures[idx:]
-        t = targets[idx:]
-        sw = sample_weights[idx:]
-        c = list(zip(s, t, sw))
-        random.shuffle(c)
-        s, t, sw = zip(*c)
-        l = len(s)
-        if i > 2 and i < len(data_size) -1: 
-            model.train(s[:int(0.8*l)], t[:int(0.8*l)],
-                    validation_structures=s[int(0.8*l):],
-                    validation_targets=t[int(0.8*l):],
-                    callbacks=[callback, XiaotongCB((test_input, test_targets), commit_id)],
-                    save_checkpoint=False,
-                    automatic_correction=False,
-                    sample_weights=sw,
-                    epochs=ep)
-            model.save_model(commit_id+'_'+str(training_mode)+'_'+str(i)+'.hdf5')
-        idx += data_size[i]
-        prediction(model)
-
 else:
     pass
 
