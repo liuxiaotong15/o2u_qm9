@@ -40,7 +40,7 @@ for it in items:
         targets.append(df[it+'_gap'][i])
         sample_weights.append(1.0/len(r))
 
-print('4 data size is:', data_size)
+print('data size is:', data_size)
 
 ### load exp data and shuffle
 
@@ -90,6 +90,21 @@ training_mode = int(sys.argv[1])
 model = MEGNetModel(10, 2, nblocks=1, lr=1e-3,
         n1=4, n2=4, n3=4, npass=1, ntarget=1,
         graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
+
+# data preprocess part
+if False:
+    # load the past if needed
+    model = MEGNetModel.from_file('test.hdf5')
+    idx = 0
+    for sz in data_size[:-1]:
+        ME = 0
+        for i in range(idx, idx + sz)
+            ME += (model.predict_structure(structures[i]).ravel() - targets[i])
+        ME /= sz
+        for i in range(idx, idx + sz)
+            targets[i] += ME
+        idx += sz
+
 
 ep = 1000
 callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=50, restore_best_weights=True)
