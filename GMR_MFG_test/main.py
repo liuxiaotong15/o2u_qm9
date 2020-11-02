@@ -104,7 +104,7 @@ if True:
         error_lst = []
         for i in range(idx, idx + sz):
             e = (model.predict_structure(structures[i]).ravel() - targets[i])
-            ME += e
+            ME += abs(e)
             error_lst.append(e)
         ME /= sz
         f = open(str(sz) + 'txt', 'wb')
