@@ -92,15 +92,24 @@ model = MEGNetModel(10, 2, nblocks=1, lr=1e-3,
         graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 
 # data preprocess part
-if False:
+
+
+if True:
+    import pickle
     # load the past if needed
-    model = MEGNetModel.from_file('test.hdf5')
+    model = MEGNetModel.from_file('6a34b94_9_2.hdf5')
     idx = 0
     for sz in data_size[:-1]:
         ME = 0
+        error_lst = []
         for i in range(idx, idx + sz):
-            ME += (model.predict_structure(structures[i]).ravel() - targets[i])
+            e = (model.predict_structure(structures[i]).ravel() - targets[i])
+            ME += e
+            error_lst.append(e)
         ME /= sz
+        f = open(str(sz) + 'txt', 'wb')
+        pickle.dump(error_lst, f)
+        f.close()
         for i in range(idx, idx + sz):
             targets[i] += ME
         idx += sz
