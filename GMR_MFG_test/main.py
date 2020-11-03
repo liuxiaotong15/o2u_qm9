@@ -9,7 +9,7 @@ import tensorflow as tf
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
  
 
 seed = 1234
@@ -106,12 +106,13 @@ if True:
             e = (model.predict_structure(structures[i]).ravel() - targets[i])
             ME += e
             error_lst.append(e)
+            targets[i] = (model.predict_structure(structures[i]).ravel() + targets[i])/2
         ME /= sz
         f = open(str(sz) + 'txt', 'wb')
         pickle.dump(error_lst, f)
         f.close()
-        for i in range(idx, idx + sz):
-            targets[i] += ME
+        # for i in range(idx, idx + sz):
+        #     targets[i] += ME
         idx += sz
 
 
