@@ -12,11 +12,11 @@ font_legend = {'family' : 'Times New Roman',
 
 fig, ax = plt.subplots()
 
-commitid = 'acb1871'
+commitid = '6a34b94'
 # lgd = ['one by one', 'all together', 'only exp training', 'all->exp']
-lgd = {6: '0', 8: '1', 9: '2'}
+lgd = {6: '3', 8: '1', 9: '4'}
 
-for idx in [6, 8, 9]:
+for idx in [6, 9]:
     filename = commitid + "_" + str(idx) + ".log"
     y = []
     with open(filename, 'r') as f:
