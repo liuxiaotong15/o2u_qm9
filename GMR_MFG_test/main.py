@@ -98,9 +98,10 @@ if True:
         ME = 0
         error_lst = []
         for i in range(idx, idx + sz):
-            e = (model.predict_structure(structures[i]).ravel() - targets[i])/targets[i]
-            ME += e
-            error_lst.append(e)
+            if targets[i] != 0 :
+                e = (model.predict_structure(structures[i]).ravel() - targets[i])/targets[i]
+                ME += e
+                error_lst.append(e)
             # if targets[i] != 0:
             #     targets[i] = (model.predict_structure(structures[i]).ravel() + targets[i])/2
         ME /= sz
