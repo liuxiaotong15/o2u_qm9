@@ -98,18 +98,19 @@ if True:
         ME = 0
         error_lst = []
         for i in range(idx, idx + sz):
-            e = (model.predict_structure(structures[i]).ravel() - targets[i])
+            e = (model.predict_structure(structures[i]).ravel() - targets[i])/targets[i]
             ME += e
             error_lst.append(e)
             # if targets[i] != 0:
             #     targets[i] = (model.predict_structure(structures[i]).ravel() + targets[i])/2
         ME /= sz
-        f = open(str(sz) + 'txt', 'wb')
+        print('Percentage of error: ', ME)
+        f = open(str(sz) + '_percentage_error.txt', 'wb')
         pickle.dump(error_lst, f)
         f.close()
         for i in range(idx, idx + sz):
             if targets[i] != 0:
-                targets[i] += ME
+                targets[i] *= (1+ME)
         idx += sz
 
 model = MEGNetModel(10, 2, nblocks=1, lr=1e-3,
