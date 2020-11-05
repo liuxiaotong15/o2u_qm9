@@ -101,7 +101,7 @@ if True:
         for i in range(idx, idx + sz):
             if targets[i] != 0 :
                 e = (model.predict_structure(structures[i]).ravel() - targets[i])/targets[i]
-                if e>0 and e<1:
+                if e>-2 and e<2:
                     ME += e
                     cnt01+=1
                 error_lst.append(e)
