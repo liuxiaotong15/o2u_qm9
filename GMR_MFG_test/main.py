@@ -99,26 +99,19 @@ if True:
     idx = 0
     for sz in data_size[:-1]:
         ME = 0
-        cnt01 = 0
         error_lst = []
         for i in range(idx, idx + sz):
-            if targets[i] != 0 :
-                e = (model.predict_structure(structures[i]).ravel() - targets[i])/targets[i]
-                if e>-2 and e<2:
-                    ME += e
-                    cnt01+=1
-                error_lst.append(e)
-            # if targets[i] != 0:
-            #     targets[i] = (model.predict_structure(structures[i]).ravel() + targets[i])/2
-        # ME /= sz
-        ME /= cnt01
-        print('Percentage of error: ', ME)
-        f = open(str(sz) + '_percentage_error.txt', 'wb')
+            e = (model.predict_structure(structures[i]).ravel() - targets[i])
+            ME += e
+            error_lst.append(e)
+            if targets[i] != 0:
+                targets[i] = (model.predict_structure(structures[i]).ravel() + targets[i])/2
+        ME /= sz
+        f = open(str(sz) + 'txt', 'wb')
         pickle.dump(error_lst, f)
         f.close()
-        for i in range(idx, idx + sz):
-            if targets[i] != 0:
-                targets[i] *= (1+ME)
+        # for i in range(idx, idx + sz):
+        #     targets[i] += ME
         idx += sz
 
 ep = 1000
