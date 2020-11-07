@@ -104,14 +104,15 @@ if True:
             e = (model.predict_structure(structures[i]).ravel() - targets[i])
             ME += e
             error_lst.append(e)
-            if targets[i] != 0:
-                targets[i] = (model.predict_structure(structures[i]).ravel() + targets[i])/2
+            # if targets[i] != 0:
+            #     targets[i] = (model.predict_structure(structures[i]).ravel() + targets[i])/2
         ME /= sz
         f = open(str(sz) + 'txt', 'wb')
         pickle.dump(error_lst, f)
         f.close()
-        # for i in range(idx, idx + sz):
-        #     targets[i] += ME
+        for i in range(idx, idx + sz):
+            if targets[i] != 0:
+                targets[i] += ME
         idx += sz
 
 ep = 1000
