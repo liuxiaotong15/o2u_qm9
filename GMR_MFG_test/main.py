@@ -87,6 +87,9 @@ def prediction(model):
 
 training_mode = int(sys.argv[1])
 
+model = MEGNetModel(10, 2, nblocks=1, lr=1e-3,
+        n1=4, n2=4, n3=4, npass=1, ntarget=1,
+        graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 
 # data preprocess part
 if True:
@@ -117,10 +120,6 @@ if True:
             if targets[i] != 0:
                 targets[i] *= (1+ME)
         idx += sz
-
-model = MEGNetModel(10, 2, nblocks=1, lr=1e-3,
-        n1=4, n2=4, n3=4, npass=1, ntarget=1,
-        graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 
 ep = 1000
 callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=50, restore_best_weights=True)
