@@ -9,7 +9,7 @@ import tensorflow as tf
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
  
 
 seed = 1234
@@ -92,10 +92,12 @@ model = MEGNetModel(10, 2, nblocks=1, lr=1e-3,
         graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 
 # data preprocess part
+
+
 if True:
     import pickle
     # load the past if needed
-    model = MEGNetModel.from_file('6a34b94_9_2.hdf5')
+    model = MEGNetModel.from_file('6b1f4dd_9_2.hdf5')
     idx = 0
     for sz in data_size[:-1]:
         ME = 0
@@ -104,16 +106,15 @@ if True:
             e = (model.predict_structure(structures[i]).ravel() - targets[i])
             ME += e
             error_lst.append(e)
-            # if targets[i] != 0:
-            #     targets[i] = (model.predict_structure(structures[i]).ravel() + targets[i])/2
+            targets[i] = (model.predict_structure(structures[i]).ravel() + targets[i])/2
         ME /= sz
         f = open(str(sz) + 'txt', 'wb')
         pickle.dump(error_lst, f)
         f.close()
-        for i in range(idx, idx + sz):
-            if targets[i] != 0:
-                targets[i] += ME
+        # for i in range(idx, idx + sz):
+        #     targets[i] += ME
         idx += sz
+
 
 ep = 1000
 callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=50, restore_best_weights=True)
