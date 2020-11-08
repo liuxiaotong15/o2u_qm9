@@ -97,7 +97,7 @@ model = MEGNetModel(10, 2, nblocks=1, lr=1e-3,
 if True:
     import pickle
     # load the past if needed
-    model = MEGNetModel.from_file('6b1f4dd_9_2.hdf5')
+    model = MEGNetModel.from_file('0a79a76_9_2.hdf5')
     idx = 0
     for sz in data_size[:-1]:
         ME = 0
