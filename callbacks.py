@@ -230,11 +230,11 @@ class XiaotongCB(Callback):
         logs = logs or {}
         loss = logs.get('loss')
         last_saved_epoch, last_metric, last_file = self._get_checkpoints()
-        if last_saved_epoch is not None:
-            if last_saved_epoch + self.patience <= epoch:
-                self.model.stop_training = True
-                logger.info('%s does not improve after %d, stopping '
-                            'the fitting...' % (self.monitor, self.patience))
+        # if last_saved_epoch is not None:
+        #     if last_saved_epoch + self.patience <= epoch:
+        #         self.model.stop_training = True
+        #         logger.info('%s does not improve after %d, stopping '
+        #                     'the fitting...' % (self.monitor, self.patience))
 
         if loss is not None:
             self.losses.append(loss)
