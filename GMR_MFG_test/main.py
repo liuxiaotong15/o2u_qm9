@@ -106,7 +106,7 @@ if True:
             e = (model.predict_structure(structures[i]).ravel() - targets[i])
             ME += e
             error_lst.append(e)
-            if abs(e) > 0.75:
+            if abs(e) > 0.25:
                 targets[i] = model.predict_structure(structures[i]).ravel()
             # targets[i] = (model.predict_structure(structures[i]).ravel() + targets[i])/2
         ME /= sz
