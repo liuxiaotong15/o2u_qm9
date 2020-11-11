@@ -106,9 +106,7 @@ if True:
             e = (model.predict_structure(structures[i]).ravel() - targets[i])
             ME += e
             error_lst.append(e)
-            if abs(e) > 0.25:
-                targets[i] = model.predict_structure(structures[i]).ravel()
-            # targets[i] = (model.predict_structure(structures[i]).ravel() + targets[i])/2
+            targets[i] = (4*model.predict_structure(structures[i]).ravel() + targets[i])/5
         ME /= sz
         f = open(str(sz) + 'txt', 'wb')
         pickle.dump(error_lst, f)
