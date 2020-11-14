@@ -87,10 +87,6 @@ def prediction(model):
 
 training_mode = int(sys.argv[1])
 
-model = MEGNetModel(10, 2, nblocks=1, lr=1e-3,
-        n1=4, n2=4, n3=4, npass=1, ntarget=1,
-        graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
-
 # data preprocess part
 
 
@@ -106,7 +102,9 @@ if True:
             e = (model.predict_structure(structures[i]).ravel() - targets[i])
             ME += e
             error_lst.append(e)
-            targets[i] = (4*model.predict_structure(structures[i]).ravel() + targets[i])/5
+            if abs(e) > 0.5:
+                targets[i] = model.predict_structure(structures[i]).ravel()
+            # targets[i] = (model.predict_structure(structures[i]).ravel() + targets[i])/2
         ME /= sz
         f = open(str(sz) + 'txt', 'wb')
         pickle.dump(error_lst, f)
@@ -114,6 +112,10 @@ if True:
         # for i in range(idx, idx + sz):
         #     targets[i] += ME
         idx += sz
+
+model = MEGNetModel(10, 2, nblocks=3, lr=1e-4,
+        n1=4, n2=4, n3=4, npass=1, ntarget=1,
+        graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 
 
 ep = 1000
