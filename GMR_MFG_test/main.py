@@ -113,12 +113,12 @@ if False:
         #     targets[i] += ME
         idx += sz
 
-model = MEGNetModel(10, 2, nblocks=3, lr=1e-4,
+model = MEGNetModel(10, 2, nblocks=1, lr=1e-4,
         n1=4, n2=4, n3=4, npass=1, ntarget=1,
         graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 
 
-ep = 1000
+ep = 5000
 callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=50, restore_best_weights=True)
 
 for s in test_structures:
