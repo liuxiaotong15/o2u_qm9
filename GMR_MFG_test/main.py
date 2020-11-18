@@ -9,7 +9,7 @@ import tensorflow as tf
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
  
 
 seed = 1234
@@ -90,7 +90,7 @@ training_mode = int(sys.argv[1])
 # data preprocess part
 
 
-if False:
+if True:
     import pickle
     # load the past if needed
     model = MEGNetModel.from_file('6a34b94_9_2.hdf5')
