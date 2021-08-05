@@ -9,7 +9,7 @@ import tensorflow as tf
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
  
 
 seed = 1234
@@ -113,13 +113,14 @@ if False:
         #     targets[i] += ME
         idx += sz
 
-model = MEGNetModel(10, 2, nblocks=1, lr=1e-4,
-        n1=4, n2=4, n3=4, npass=1, ntarget=1,
-        graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
+# model = MEGNetModel(10, 2, nblocks=3, lr=1e-3,
+#         n1=4, n2=4, n3=4, npass=1, ntarget=1,
+#         graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 
+model = MEGNetModel(nfeat_edge=10, nfeat_global=2, graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 
 ep = 5000
-callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=50, restore_best_weights=True)
+callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=True)
 
 for s in test_structures:
     test_input.append(model.graph_converter.graph_to_input(model.graph_converter.convert(s)))
@@ -152,7 +153,8 @@ elif training_mode == 4: # use E1 as validation dataset, P -> H -> G -> S one by
                 callbacks=[callback],
                 epochs=ep,
                 save_checkpoint=False,
-                automatic_correction=False)
+                automatic_correction=False,
+                batch_size = 512)
         idx += data_size[i]
         prediction(model)
 elif training_mode == 5: # use more accuracy dataset as validation dataset, P -> H -> G -> S one by one
@@ -164,7 +166,8 @@ elif training_mode == 5: # use more accuracy dataset as validation dataset, P ->
                 callbacks=[callback],
                 epochs=ep,
                 save_checkpoint=False,
-                automatic_correction=False)
+                automatic_correction=False,
+                batch_size = 512)
         idx += data_size[i]
         prediction(model)
 elif training_mode == 6: # PBE -> HSE ... -> part EXP, one by one, with 20% validation
@@ -176,6 +179,7 @@ elif training_mode == 6: # PBE -> HSE ... -> part EXP, one by one, with 20% vali
                 callbacks=[callback, XiaotongCB((test_input, test_targets), commit_id)],
                 epochs=ep,
                 save_checkpoint=False,
+                batch_size = 512,
                 automatic_correction=False)
         model.save_model(commit_id+'_'+str(training_mode)+'_'+str(i)+'.hdf5')
         idx += data_size[i]
