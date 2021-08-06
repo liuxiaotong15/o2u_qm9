@@ -189,8 +189,8 @@ elif training_mode == 11: # PBE -> HSE ... -> part EXP, one by one, with 20% of 
     idx = 0
     for i in range(len(data_size)):
         model.train(structures[idx:idx+int(0.8*data_size[i])], targets[idx:idx+int(0.8*data_size[i])],
-                validation_structures=structures[sum(data_size[:-1])+int(0.8*data_size[-1]:],
-                validation_targets=targets[sum(data_size[:-1])+int(0.8*data_size[-1]:],
+                validation_structures=structures[sum(data_size[:-1])+int(0.8*data_size[-1]):],
+                validation_targets=targets[sum(data_size[:-1])+int(0.8*data_size[-1]):],
                 # validation_structures=structures[idx+int(0.8*data_size[i]):(idx+data_size[i])],
                 # validation_targets=targets[idx+int(0.8*data_size[i]):(idx+data_size[i])],
                 # callbacks=[callback, XiaotongCB((test_input, test_targets), commit_id)],
