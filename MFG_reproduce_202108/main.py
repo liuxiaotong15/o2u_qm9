@@ -210,8 +210,10 @@ elif training_mode == 7: # all training set together with 20% validation
     model.train(structures[:int(0.8 * l)], targets[:int(0.8 * l)],
             validation_structures=structures[int(0.8 * l):],
             validation_targets=targets[int(0.8 * l):],
-            callbacks=[callback, XiaotongCB((test_input, test_targets), commit_id)],
+            # callbacks=[callback, XiaotongCB((test_input, test_targets), commit_id)],
+            callbacks=[callback],
             epochs=ep*len(data_size),
+            batch_size = 512,
             save_checkpoint=False,
             automatic_correction=False)
     prediction(model)
@@ -219,9 +221,11 @@ elif training_mode == 8: # only part EXP with 20% validation
     model.train(structures[-1*data_size[-1]:int(-0.2*data_size[-1])], targets[-1*data_size[-1]:int(-0.2*data_size[-1])],
             validation_structures=structures[int(-0.2*data_size[-1]):],
             validation_targets=targets[int(-0.2*data_size[-1]):],
-            callbacks=[callback, XiaotongCB((test_input, test_targets), commit_id)],
+            # callbacks=[callback, XiaotongCB((test_input, test_targets), commit_id)],
+            callbacks=[callback],
             epochs=ep*len(data_size),
             save_checkpoint=False,
+            batch_size = 512,
             automatic_correction=False)
     prediction(model)
 elif training_mode == 9 or training_mode == 10: # all -> all-PBE -> all-PBE-HSE -> ... -> part EXP with 20% validation
@@ -239,10 +243,12 @@ elif training_mode == 9 or training_mode == 10: # all -> all-PBE -> all-PBE-HSE 
         model.train(s[:int(0.8*l)], t[:int(0.8*l)],
                 validation_structures=s[int(0.8*l):],
                 validation_targets=t[int(0.8*l):],
-                callbacks=[callback, XiaotongCB((test_input, test_targets), commit_id)],
+                # callbacks=[callback, XiaotongCB((test_input, test_targets), commit_id)],
+                callbacks=[callback],
                 save_checkpoint=False,
                 automatic_correction=False,
                 sample_weights=sw,
+                batch_size = 512,
                 epochs=ep)
         model.save_model(commit_id+'_'+str(training_mode)+'_'+str(i)+'.hdf5')
         idx += data_size[i]
