@@ -12,15 +12,15 @@ os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
  
 
-seed = 1234
+seed = 12345
 random.seed(seed)
 np.random.seed(seed)
 commit_id = str(os.popen('git --no-pager log -1 --oneline --pretty=format:"%h"').read())
 
 print('commit_id is: ', commit_id)
 
-# items = ['pbe', 'hse', 'gllb-sc', 'scan']
-items = ['pbe', 'hse']
+items = ['pbe', 'hse', 'gllb-sc', 'scan']
+# items = ['pbe', 'hse']
 
 structures = []
 targets = []
@@ -90,10 +90,10 @@ training_mode = int(sys.argv[1])
 # data preprocess part
 
 
-if False:
+if True:
     import pickle
     # load the past if needed
-    model = MEGNetModel.from_file('6a34b94_9_2.hdf5')
+    model = MEGNetModel.from_file('6e98739_9_4.hdf5')
     idx = 0
     for sz in data_size[:-1]:
         ME = 0
