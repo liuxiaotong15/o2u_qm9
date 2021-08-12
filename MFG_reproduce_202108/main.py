@@ -12,7 +12,7 @@ os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
  
 
-seed = 12345
+seed = 123
 random.seed(seed)
 np.random.seed(seed)
 commit_id = str(os.popen('git --no-pager log -1 --oneline --pretty=format:"%h"').read())
@@ -102,11 +102,11 @@ if True:
             e = (model.predict_structure(structures[i]).ravel() - targets[i])
             ME += e
             error_lst.append(e)
-            if abs(e) > 0.5:
-                targets[i] = model.predict_structure(structures[i]).ravel()
-            # targets[i] = (model.predict_structure(structures[i]).ravel() + targets[i])/2
+            # if abs(e) > 0.5:
+            #     targets[i] = model.predict_structure(structures[i]).ravel()
+            targets[i] = (model.predict_structure(structures[i]).ravel() + targets[i])/2
         ME /= sz
-        f = open(str(sz) + 'txt', 'wb')
+        f = open(commit_id + '_' + str(training_mode) + '_'+ str(sz) + '.txt', 'wb') # to store and analyze the error
         pickle.dump(error_lst, f)
         f.close()
         # for i in range(idx, idx + sz):
@@ -182,7 +182,7 @@ elif training_mode == 6: # PBE -> HSE ... -> part EXP, one by one, with 20% vali
                 save_checkpoint=False,
                 batch_size = 512,
                 automatic_correction=False)
-        # model.save_model(commit_id+'_'+str(training_mode)+'_'+str(i)+'.hdf5')
+        model.save_model(commit_id+'_'+str(training_mode)+'_'+str(i)+'.hdf5')
         idx += data_size[i]
         prediction(model)
 elif training_mode == 11: # PBE -> HSE ... -> part EXP, one by one, with 20% of last dataset as validation
