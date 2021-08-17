@@ -9,7 +9,7 @@ import tensorflow as tf
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
  
 
 seed = 1234
@@ -104,9 +104,9 @@ if True:
             e = (model.predict_structure(structures[i]).ravel() - targets[i])
             ME += e
             error_lst.append(e)
-            # if abs(e) > 0.5:
-            #     targets[i] = model.predict_structure(structures[i]).ravel()
-            targets[i] = (model.predict_structure(structures[i]).ravel() + targets[i])/2
+            if abs(e) > 0.5:
+                targets[i] = model.predict_structure(structures[i]).ravel()
+            # targets[i] = (model.predict_structure(structures[i]).ravel() + targets[i])/2
         ME /= sz
         f = open(commit_id + '_' + str(training_mode) + '_'+ str(sz) + '.txt', 'wb') # to store and analyze the error
         pickle.dump(error_lst, f)
