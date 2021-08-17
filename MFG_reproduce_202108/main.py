@@ -19,8 +19,9 @@ commit_id = str(os.popen('git --no-pager log -1 --oneline --pretty=format:"%h"')
 
 print('commit_id is: ', commit_id)
 
-items = ['pbe', 'hse', 'gllb-sc', 'scan']
-items = ['gllb-sc', 'hse', 'scan', 'pbe']
+# items = ['pbe', 'hse', 'gllb-sc', 'scan']
+# items = ['gllb-sc', 'hse', 'scan', 'pbe']
+items = ['gllb-sc', 'pbe', 'scan', 'hse']
 # items = ['pbe', 'hse']
 
 structures = []
