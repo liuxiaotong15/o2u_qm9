@@ -92,10 +92,10 @@ training_mode = int(sys.argv[1])
 # data preprocess part
 
 
-if False:
+if True:
     import pickle
     # load the past if needed
-    model = MEGNetModel.from_file('6e98739_9_4.hdf5')
+    model = MEGNetModel.from_file('7075e10_9_4.hdf5')
     idx = 0
     for sz in data_size[:-1]:
         ME = 0
