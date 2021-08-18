@@ -25,7 +25,7 @@ items = ['gllb-sc', 'pbe', 'scan', 'hse']
 # items = ['pbe', 'hse']
 
 tau_modify_enable = True
-tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744] # P, H, S, G
+tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H, S, G
 
 load_old_model_enable = False
 old_model_name = '7075e10_9_4.hdf5'
