@@ -9,7 +9,7 @@ import tensorflow as tf
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
  
 
 seed = 1234
@@ -23,6 +23,12 @@ print('commit_id is: ', commit_id)
 # items = ['gllb-sc', 'hse', 'scan', 'pbe']
 items = ['gllb-sc', 'pbe', 'scan', 'hse']
 # items = ['pbe', 'hse']
+
+tau_modify_enable = True
+tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744] # P, H, S, G
+
+load_old_model_enable = False
+old_model_name = '7075e10_9_4.hdf5'
 
 structures = []
 targets = []
@@ -39,7 +45,10 @@ for it in items:
     random.shuffle(r)
     for i in r:
         structures.append(Structure.from_str(df[it+'_structure'][i], fmt='cif'))
-        targets.append(df[it+'_gap'][i])
+        if tau_modify_enable:
+            targets.append(df[it+'_gap'][i]) * tau_dict[it]
+        else:
+            targets.append(df[it+'_gap'][i])
         sample_weights.append(1.0/len(r))
 
 print('data size is:', data_size)
@@ -92,10 +101,10 @@ training_mode = int(sys.argv[1])
 # data preprocess part
 
 
-if True:
+if load_old_model_enable:
     import pickle
     # load the past if needed
-    model = MEGNetModel.from_file('7075e10_9_4.hdf5')
+    model = MEGNetModel.from_file(old_model_name)
     idx = 0
     for sz in data_size[:-1]:
         ME = 0
