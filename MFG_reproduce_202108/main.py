@@ -9,7 +9,7 @@ import tensorflow as tf
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
  
 
 seed = 1234
@@ -46,7 +46,7 @@ for it in items:
     for i in r:
         structures.append(Structure.from_str(df[it+'_structure'][i], fmt='cif'))
         if tau_modify_enable:
-            targets.append(df[it+'_gap'][i]) * tau_dict[it]
+            targets.append(df[it+'_gap'][i] * tau_dict[it])
         else:
             targets.append(df[it+'_gap'][i])
         sample_weights.append(1.0/len(r))
