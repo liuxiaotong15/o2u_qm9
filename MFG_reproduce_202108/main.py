@@ -11,7 +11,7 @@ import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-seed = 123
+seed = 12
 random.seed(seed)
 np.random.seed(seed)
 commit_id = str(os.popen('git --no-pager log -1 --oneline --pretty=format:"%h"').read())
@@ -23,7 +23,7 @@ print('commit_id is: ', commit_id)
 items = ['gllb-sc', 'pbe', 'scan', 'hse']
 # items = ['pbe', 'hse']
 
-tau_modify_enable = True
+tau_modify_enable = False
 tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H, S, G # min(MSE)
 # tau_dict = {'pbe': 1/0.6279685889089127,
 #             'hse': 1/0.7774483582697933,
@@ -101,9 +101,13 @@ def prediction(model):
 
 training_mode = int(sys.argv[1])
 
+
+dump_model_name = '{commit_id}_{training_mode}_{seed}'.format{commit_id=commit_id, 
+        training_mode=training_mode,
+        seed=seed}
+print(dump_model_name)
+
 # data preprocess part
-
-
 if load_old_model_enable:
     import pickle
     # load the past if needed
@@ -120,7 +124,7 @@ if load_old_model_enable:
                 targets[i] = model.predict_structure(structures[i]).ravel()
             # targets[i] = (model.predict_structure(structures[i]).ravel() + targets[i])/2
         ME /= sz
-        f = open(commit_id + '_' + str(training_mode) + '_'+ str(sz) + '.txt', 'wb') # to store and analyze the error
+        f = open(dump_model_name + '_'+ str(sz) + '.txt', 'wb') # to store and analyze the error
         pickle.dump(error_lst, f)
         f.close()
         # for i in range(idx, idx + sz):
@@ -138,6 +142,7 @@ callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, res
 
 for s in test_structures:
     test_input.append(model.graph_converter.graph_to_input(model.graph_converter.convert(s)))
+
 
 if training_mode == 0: # PBE -> HSE ... -> part EXP, one by one
     idx = 0
@@ -196,7 +201,7 @@ elif training_mode == 6: # PBE -> HSE ... -> part EXP, one by one, with 20% vali
                 save_checkpoint=False,
                 batch_size = 512,
                 automatic_correction=False)
-        model.save_model(commit_id+'_'+str(training_mode)+'_'+str(i)+'.hdf5')
+        model.save_model(dump_model_name+'_'+str(i)+'.hdf5')
         idx += data_size[i]
         prediction(model)
 elif training_mode == 11: # PBE -> HSE ... -> part EXP, one by one, with 20% of last dataset as validation
@@ -264,7 +269,7 @@ elif training_mode == 9 or training_mode == 10: # all -> all-PBE -> all-PBE-HSE 
                 sample_weights=sw,
                 batch_size = 512,
                 epochs=ep)
-        model.save_model(commit_id+'_'+str(training_mode)+'_'+str(i)+'.hdf5')
+        model.save_model(dump_model_name+'_'+str(i)+'.hdf5')
         idx += data_size[i]
         prediction(model)
 else:
