@@ -102,9 +102,9 @@ def prediction(model):
 training_mode = int(sys.argv[1])
 
 
-dump_model_name = '{commit_id}_{training_mode}_{seed}'.format{commit_id=commit_id, 
+dump_model_name = '{commit_id}_{training_mode}_{seed}'.format(commit_id=commit_id, 
         training_mode=training_mode,
-        seed=seed}
+        seed=seed)
 print(dump_model_name)
 
 # data preprocess part
