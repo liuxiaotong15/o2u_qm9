@@ -11,7 +11,7 @@ import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-seed = 12
+seed = 1234
 random.seed(seed)
 np.random.seed(seed)
 commit_id = str(os.popen('git --no-pager log -1 --oneline --pretty=format:"%h"').read())
@@ -30,8 +30,9 @@ tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H,
 #             'scan': 1/0.7430766771711287,
 #             'gllb-sc': 1/1.0419268013851504} # P, H, S, G # min(MAE)
 
-load_old_model_enable = False
+load_old_model_enable = True
 old_model_name = '7075e10_9_4.hdf5'
+cut_value = 0.3
 
 structures = []
 targets = []
@@ -120,7 +121,7 @@ if load_old_model_enable:
             e = (model.predict_structure(structures[i]).ravel() - targets[i])
             ME += e
             error_lst.append(e)
-            if abs(e) > 0.5:
+            if abs(e) > cut_value:
                 targets[i] = model.predict_structure(structures[i]).ravel()
             # targets[i] = (model.predict_structure(structures[i]).ravel() + targets[i])/2
         ME /= sz
