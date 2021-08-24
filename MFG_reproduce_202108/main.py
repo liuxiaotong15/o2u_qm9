@@ -9,7 +9,7 @@ import tensorflow as tf
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 seed = 123
 random.seed(seed)
@@ -114,22 +114,28 @@ if load_old_model_enable:
     # load the past if needed
     model = MEGNetModel.from_file(old_model_name)
     idx = 0
+    print('-' * 100)
     for sz in data_size[:-1]:
-        ME = 0
         error_lst = []
+        prediction_lst = []
+        targets_lst = []
         for i in range(idx, idx + sz):
-            e = (model.predict_structure(structures[i]).ravel() - targets[i])
-            ME += e
+            prdc = model.predict_structure(structures[i]).ravel()
+            tgt = targets[i]
+            prediction_lst.append(prdc)
+            targets_lst.append(tgt)
+            e = (prdc - tgt)
             error_lst.append(e)
             if abs(e) > cut_value:
-                targets[i] = model.predict_structure(structures[i]).ravel()
+                targets[i] = prdc
             # targets[i] = (model.predict_structure(structures[i]).ravel() + targets[i])/2
-        ME /= sz
+        print('std orig: {std_orig}, std_model: {std_model}'.format(
+            std_orig=np.std(targets_lst), std_model=np.std(prediction_lst)))
+        print('mean orig: {mean_orig}, mean_model: {mean_model}'.format(
+            mean_orig=np.mean(targets_lst), mean_model=np.mean(prediction_lst)))
         f = open(dump_model_name + '_'+ str(sz) + '.txt', 'wb') # to store and analyze the error
         pickle.dump(error_lst, f)
         f.close()
-        # for i in range(idx, idx + sz):
-        #     targets[i] += ME
         idx += sz
 
 # model = MEGNetModel(10, 2, nblocks=3, lr=1e-3,
