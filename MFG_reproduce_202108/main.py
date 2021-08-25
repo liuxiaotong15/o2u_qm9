@@ -32,7 +32,7 @@ tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H,
 
 load_old_model_enable = True
 old_model_name = '7075e10_9_4.hdf5'
-cut_value = 0.1
+cut_value = 0.7
 
 structures = []
 targets = []
