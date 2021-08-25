@@ -9,7 +9,7 @@ import tensorflow as tf
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 seed = 123
 random.seed(seed)
@@ -67,22 +67,22 @@ data_path = 'data/all_data.json' # put here the path to the json file
 with open(data_path,'r') as fp:
     d = json.load(fp)
 
-s = [Structure.from_dict(x['structure']) for x in d['ordered_exp'].values()]
-t = [x['band_gap'] for x in d['ordered_exp'].values()]
+s_exp = [Structure.from_dict(x['structure']) for x in d['ordered_exp'].values()]
+t_exp = [x['band_gap'] for x in d['ordered_exp'].values()]
 
-print('exp data size is:', len(s))
+print('exp data size is:', len(s_exp))
 data_size.append(0)
 r = list(range(len(list(d['ordered_exp'].keys()))))
 random.shuffle(r)
 for i in r:
     if random.random() > 0.5:
-        structures.append(s[i])
-        targets.append(t[i])
+        structures.append(s_exp[i])
+        targets.append(t_exp[i])
         data_size[-1]+=1
         sample_weights.append(1.0)
     else:
-        test_structures.append(s[i])
-        test_targets.append(t[i])
+        test_structures.append(s_exp[i])
+        test_targets.append(t_exp[i])
 
 
 from megnet.data.crystal import CrystalGraph
@@ -115,6 +115,13 @@ if load_old_model_enable:
     model = MEGNetModel.from_file(old_model_name)
     idx = 0
     print('-' * 100)
+    diff_lst = []
+    for i in range(len(s_exp)):
+        diff_lst.append(model.predict_structure(s_exp[i]).ravel() - t_exp[i])
+    print('std of the diff of  model output and exp data is: {std}, \
+            mean diff is: {mean}'.format(std=np.std(diff_lst),
+                mean=np.mean(diff_lst)))
+
     for sz in data_size[:-1]:
         error_lst = []
         prediction_lst = []
