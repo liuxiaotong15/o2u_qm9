@@ -9,7 +9,7 @@ import tensorflow as tf
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 seed = 123
 random.seed(seed)
@@ -24,11 +24,11 @@ items = ['gllb-sc', 'pbe', 'scan', 'hse']
 # items = ['pbe', 'hse']
 
 tau_modify_enable = True
-tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H, S, G # min(MSE)
-# tau_dict = {'pbe': 1/0.6279685889089127,
-#             'hse': 1/0.7774483582697933,
-#             'scan': 1/0.7430766771711287,
-#             'gllb-sc': 1/1.0419268013851504} # P, H, S, G # min(MAE)
+# tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H, S, G # min(MSE)
+tau_dict = {'pbe': 1/0.6279685889089127,
+            'hse': 1/0.7774483582697933,
+            'scan': 1/0.7430766771711287,
+            'gllb-sc': 1/1.0419268013851504} # P, H, S, G # min(MAE)
 
 load_old_model_enable = True
 old_model_name = '7075e10_9_4.hdf5'
