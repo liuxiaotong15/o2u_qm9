@@ -15,7 +15,7 @@ from megnet.callbacks import XiaotongCB
 
 import sys
 training_mode = int(sys.argv[1])
-seed = 123
+seed = 1234
 random.seed(seed)
 np.random.seed(seed)
 commit_id = str(os.popen('git --no-pager log -1 --oneline --pretty=format:"%h"').read())
@@ -43,7 +43,7 @@ def prediction(model):
 
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 logging.info('commit_id is: {cid}'.format(cid=commit_id))
 
