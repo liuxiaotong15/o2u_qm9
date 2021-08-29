@@ -8,20 +8,50 @@ import tensorflow as tf
 
 import os
 
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+from megnet.data.crystal import CrystalGraph
+from megnet.data.graph import GaussianDistance
+from megnet.models import MEGNetModel
+from megnet.callbacks import XiaotongCB
 
+import sys
+training_mode = int(sys.argv[1])
 seed = 123
 random.seed(seed)
 np.random.seed(seed)
 commit_id = str(os.popen('git --no-pager log -1 --oneline --pretty=format:"%h"').read())
 
-print('commit_id is: ', commit_id)
+dump_model_name = '{commit_id}_{training_mode}_{seed}'.format(commit_id=commit_id, 
+        training_mode=training_mode,
+        seed=seed)
+
+import logging
+root_logger = logging.getLogger()
+for h in root_logger.handlers[:]:
+    root_logger.removeHandler(h)
+logging.getLogger().setLevel(logging.INFO)
+logging.basicConfig(filename=dump_model_name+".log",
+        format='%(asctime)s-%(pathname)s[line:%(lineno)d]-%(levelname)s: %(message)s',
+        level=logging.INFO)
+
+def prediction(model):
+    MAE = 0
+    test_size = len(test_structures)
+    for i in range(test_size):
+        MAE += abs(model.predict_structure(test_structures[i]).ravel() - test_targets[i])
+    MAE /= test_size
+    logging.info('MAE is: {mae}'.format(mae=MAE))
+
+
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
+logging.info('commit_id is: {cid}'.format(cid=commit_id))
 
 # items = ['pbe', 'hse', 'gllb-sc', 'scan']
 # items = ['gllb-sc', 'hse', 'scan', 'pbe']
 # items = ['gllb-sc', 'pbe', 'scan', 'hse']
 items = ['pbe', 'hse']
+logging.info('items is {it}'.format(it=str(items)))
 
 tau_modify_enable = False
 # tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H, S, G # min(MSE)
@@ -30,9 +60,15 @@ tau_dict = {'pbe': 1/0.6279685889089127,
             'scan': 1/0.7430766771711287,
             'gllb-sc': 1/1.0419268013851504} # P, H, S, G # min(MAE)
 
+logging.info('tau_enable={t} and tau_dict is {td}'.format(
+    t=str(tau_modify_enable), td=str(tau_dict)))
+
 load_old_model_enable = True
 old_model_name = '7075e10_9_4.hdf5'
 cut_value = 0.3
+
+logging.info('load_old_model_enable={l}, old_model_name={omn}, cut_value={cv}'.format(
+    l=load_old_model_enable, omn=old_model_name, cv=cut_value))
 
 structures = []
 targets = []
@@ -55,7 +91,7 @@ for it in items:
             targets.append(df[it+'_gap'][i])
         sample_weights.append(1.0/len(r))
 
-print('data size is:', data_size)
+logging.info('data size is: {ds}'.format(ds=data_size))
 
 ### load exp data and shuffle
 
@@ -70,7 +106,7 @@ with open(data_path,'r') as fp:
 s_exp = [Structure.from_dict(x['structure']) for x in d['ordered_exp'].values()]
 t_exp = [x['band_gap'] for x in d['ordered_exp'].values()]
 
-print('exp data size is:', len(s_exp))
+logging.info('exp data size is: {s}'.format(s=len(s_exp)))
 data_size.append(0)
 r = list(range(len(list(d['ordered_exp'].keys()))))
 random.shuffle(r)
@@ -85,41 +121,17 @@ for i in r:
         test_targets.append(t_exp[i])
 
 
-from megnet.data.crystal import CrystalGraph
-from megnet.data.graph import GaussianDistance
-from megnet.models import MEGNetModel
-from megnet.callbacks import XiaotongCB
-
-import sys
-
-def prediction(model):
-    MAE = 0
-    test_size = len(test_structures)
-    for i in range(test_size):
-        MAE += abs(model.predict_structure(test_structures[i]).ravel() - test_targets[i])
-    MAE /= test_size
-    print('MAE is:', MAE)
-
-training_mode = int(sys.argv[1])
-
-
-dump_model_name = '{commit_id}_{training_mode}_{seed}'.format(commit_id=commit_id, 
-        training_mode=training_mode,
-        seed=seed)
-print(dump_model_name)
-
 # data preprocess part
 if load_old_model_enable:
     import pickle
     # load the past if needed
     model = MEGNetModel.from_file(old_model_name)
     idx = 0
-    print('-' * 100)
     diff_lst = []
     for i in range(len(s_exp)):
         diff_lst.append(model.predict_structure(s_exp[i]).ravel() - t_exp[i])
-    print('std of the diff of  model output and exp data is: {std}, \
-            mean diff is: {mean}'.format(std=np.std(diff_lst),
+    logging.info('Std of the list(model output - exp data) is: {std}, \
+mean is: {mean}'.format(std=np.std(diff_lst),
                 mean=np.mean(diff_lst)))
 
     for sz in data_size[:-1]:
@@ -136,10 +148,10 @@ if load_old_model_enable:
             if abs(e) > cut_value:
                 targets[i] = prdc
             # targets[i] = (model.predict_structure(structures[i]).ravel() + targets[i])/2
-        print('std orig: {std_orig}, std_model: {std_model}'.format(
-            std_orig=np.std(targets_lst), std_model=np.std(prediction_lst)))
-        print('mean orig: {mean_orig}, mean_model: {mean_model}'.format(
-            mean_orig=np.mean(targets_lst), mean_model=np.mean(prediction_lst)))
+        logging.info('Data count: {dc}, std orig dft value: {std_orig}, std of model output: {std_model}'.format(
+            dc=sz, std_orig=np.std(targets_lst), std_model=np.std(prediction_lst)))
+        logging.info('Data count: {dc}, Mean orig: {mean_orig}, Mean_model: {mean_model}'.format(
+            dc=sz, mean_orig=np.mean(targets_lst), mean_model=np.mean(prediction_lst)))
         f = open(dump_model_name + '_'+ str(sz) + '.txt', 'wb') # to store and analyze the error
         pickle.dump(error_lst, f)
         f.close()
@@ -179,7 +191,6 @@ elif training_mode == 3: # all -> all-PBE -> all-PBE-HSE -> ... -> part EXP
 elif training_mode == 4: # use E1 as validation dataset, P -> H -> G -> S one by one
     idx = 0
     for i in range(len(data_size)-1):
-        print('vali dataset length: ', len(structures[sum(data_size[:-1]):]))
         model.train(structures[idx:idx+data_size[i]], targets[idx:idx+data_size[i]],
                 validation_structures=structures[sum(data_size[:-1]):],
                 validation_targets=targets[sum(data_size[:-1]):],
