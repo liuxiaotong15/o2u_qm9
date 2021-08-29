@@ -15,7 +15,7 @@ from megnet.callbacks import XiaotongCB
 
 import sys
 training_mode = int(sys.argv[1])
-seed = 1234
+seed = 123
 random.seed(seed)
 np.random.seed(seed)
 commit_id = str(os.popen('git --no-pager log -1 --oneline --pretty=format:"%h"').read())
@@ -53,12 +53,12 @@ logging.info('commit_id is: {cid}'.format(cid=commit_id))
 items = ['pbe', 'hse']
 logging.info('items is {it}'.format(it=str(items)))
 
-tau_modify_enable = False
-# tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H, S, G # min(MSE)
-tau_dict = {'pbe': 1/0.6279685889089127,
-            'hse': 1/0.7774483582697933,
-            'scan': 1/0.7430766771711287,
-            'gllb-sc': 1/1.0419268013851504} # P, H, S, G # min(MAE)
+tau_modify_enable = True
+tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H, S, G # min(MSE)
+# tau_dict = {'pbe': 1/0.6279685889089127,
+#             'hse': 1/0.7774483582697933,
+#             'scan': 1/0.7430766771711287,
+#             'gllb-sc': 1/1.0419268013851504} # P, H, S, G # min(MAE)
 
 logging.info('tau_enable={t} and tau_dict is {td}'.format(
     t=str(tau_modify_enable), td=str(tau_dict)))
