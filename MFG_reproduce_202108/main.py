@@ -15,7 +15,7 @@ from megnet.callbacks import XiaotongCB
 
 import sys
 training_mode = int(sys.argv[1])
-seed = 123
+seed = 12345
 random.seed(seed)
 np.random.seed(seed)
 commit_id = str(os.popen('git --no-pager log -1 --oneline --pretty=format:"%h"').read())
