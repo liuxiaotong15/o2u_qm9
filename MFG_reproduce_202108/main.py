@@ -43,9 +43,10 @@ def prediction(model):
 
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 logging.info('commit_id is: {cid}'.format(cid=commit_id))
+logging.info('training_mode is: {tm}'.format(tm=training_mode))
 
 # items = ['pbe', 'hse', 'gllb-sc', 'scan']
 # items = ['gllb-sc', 'hse', 'scan', 'pbe']
@@ -53,7 +54,7 @@ logging.info('commit_id is: {cid}'.format(cid=commit_id))
 items = ['pbe', 'hse']
 logging.info('items is {it}'.format(it=str(items)))
 
-tau_modify_enable = True
+tau_modify_enable = False
 tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H, S, G # min(MSE)
 # tau_dict = {'pbe': 1/0.6279685889089127,
 #             'hse': 1/0.7774483582697933,
