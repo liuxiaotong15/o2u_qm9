@@ -43,18 +43,18 @@ def prediction(model):
 
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 logging.info('commit_id is: {cid}'.format(cid=commit_id))
 logging.info('training_mode is: {tm}'.format(tm=training_mode))
 
 # items = ['pbe', 'hse', 'gllb-sc', 'scan']
 # items = ['gllb-sc', 'hse', 'scan', 'pbe']
-# items = ['gllb-sc', 'pbe', 'scan', 'hse']
-items = ['pbe', 'hse']
+items = ['gllb-sc', 'pbe', 'scan', 'hse']
+# items = ['pbe', 'hse']
 logging.info('items is {it}'.format(it=str(items)))
 
-tau_modify_enable = True
+tau_modify_enable = False
 # tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H, S, G # min(MSE)
 tau_dict = {'pbe': 1/0.6279685889089127,
             'hse': 1/0.7774483582697933,
@@ -65,7 +65,7 @@ logging.info('tau_enable={t} and tau_dict is {td}'.format(
     t=str(tau_modify_enable), td=str(tau_dict)))
 
 load_old_model_enable = True
-old_model_name = '7075e10_9_4.hdf5'
+old_model_name = '249acf2_9_123_4.hdf5'
 cut_value = 0.3
 
 logging.info('load_old_model_enable={l}, old_model_name={omn}, cut_value={cv}'.format(
