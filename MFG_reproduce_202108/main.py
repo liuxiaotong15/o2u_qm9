@@ -65,7 +65,8 @@ logging.info('tau_enable={t} and tau_dict is {td}'.format(
     t=str(tau_modify_enable), td=str(tau_dict)))
 
 load_old_model_enable = True
-old_model_name = '249acf2_9_123_4.hdf5'
+# old_model_name = '249acf2_9_123_4.hdf5'
+old_model_name = 'c5ddc72_9_123_4.hdf5'
 cut_value = 0.3
 
 logging.info('load_old_model_enable={l}, old_model_name={omn}, cut_value={cv}'.format(
