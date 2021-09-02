@@ -16,6 +16,8 @@ from megnet.callbacks import XiaotongCB
 import sys
 training_mode = int(sys.argv[1])
 seed = 123
+GPU_device = "0"
+
 random.seed(seed)
 np.random.seed(seed)
 commit_id = str(os.popen('git --no-pager log -1 --oneline --pretty=format:"%h"').read())
@@ -43,10 +45,11 @@ def prediction(model):
 
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = device
 
 logging.info('commit_id is: {cid}'.format(cid=commit_id))
 logging.info('training_mode is: {tm}'.format(tm=training_mode))
+logging.info('device number is: GPU_{d}'.format(d=device))
 
 # items = ['pbe', 'hse', 'gllb-sc', 'scan']
 # items = ['gllb-sc', 'hse', 'scan', 'pbe']
@@ -164,7 +167,7 @@ mean is: {mean}'.format(std=np.std(diff_lst),
 #         n1=4, n2=4, n3=4, npass=1, ntarget=1,
 #         graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 
-model = MEGNetModel(nfeat_edge=10, nfeat_global=2, graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
+model = MEGNetModel(nfeat_edge=10, nfeat_global=2, lr=1e-4, graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 
 ep = 5000
 callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=True)
