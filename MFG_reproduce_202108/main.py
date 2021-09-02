@@ -45,11 +45,11 @@ def prediction(model):
 
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = device
+os.environ["CUDA_VISIBLE_DEVICES"] = GPU_device
 
 logging.info('commit_id is: {cid}'.format(cid=commit_id))
 logging.info('training_mode is: {tm}'.format(tm=training_mode))
-logging.info('device number is: GPU_{d}'.format(d=device))
+logging.info('device number is: GPU_{d}'.format(d=GPU_device))
 
 # items = ['pbe', 'hse', 'gllb-sc', 'scan']
 # items = ['gllb-sc', 'hse', 'scan', 'pbe']
