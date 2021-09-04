@@ -16,16 +16,30 @@ from megnet.callbacks import XiaotongCB
 import sys
 training_mode = int(sys.argv[1])
 seed = 123
-GPU_device = ""
-dump_prediction_cif = True
+GPU_device = "0"
+dump_prediction_cif = False
 load_old_model_enable = True
 predict_before_dataclean = True
-training_new_model = False
+training_new_model = True
 
+tau_modify_enable = False
+# tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H, S, G # min(MSE)
+tau_dict = {'pbe': 1/0.6279685889089127,
+            'hse': 1/0.7774483582697933,
+            'scan': 1/0.7430766771711287,
+            'gllb-sc': 1/1.0419268013851504} # P, H, S, G # min(MAE)
+
+# items = ['pbe', 'hse', 'gllb-sc', 'scan']
+# items = ['gllb-sc', 'hse', 'scan', 'pbe']
+items = ['gllb-sc', 'pbe', 'scan', 'hse']
+# items = ['pbe', 'hse']
+
+
+old_model_name = '7075e10_9_4.hdf5'
 # old_model_name = '249acf2_9_123_4.hdf5'
 # old_model_name = 'c5ddc72_9_123_4.hdf5'
-old_model_name = '1d8f4bd_9_123_4.hdf5'
-cut_value = 0.3
+# old_model_name = '1d8f4bd_9_123_4.hdf5'
+cut_value = 0.2
 
 random.seed(seed)
 np.random.seed(seed)
@@ -66,19 +80,7 @@ logging.info('commit_id is: {cid}'.format(cid=commit_id))
 logging.info('training_mode is: {tm}'.format(tm=training_mode))
 logging.info('device number is: GPU_{d}'.format(d=GPU_device))
 
-# items = ['pbe', 'hse', 'gllb-sc', 'scan']
-# items = ['gllb-sc', 'hse', 'scan', 'pbe']
-items = ['gllb-sc', 'pbe', 'scan', 'hse']
-# items = ['pbe', 'hse']
 logging.info('items is {it}'.format(it=str(items)))
-
-tau_modify_enable = False
-# tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H, S, G # min(MSE)
-tau_dict = {'pbe': 1/0.6279685889089127,
-            'hse': 1/0.7774483582697933,
-            'scan': 1/0.7430766771711287,
-            'gllb-sc': 1/1.0419268013851504} # P, H, S, G # min(MAE)
-
 logging.info('tau_enable={t} and tau_dict is {td}'.format(
     t=str(tau_modify_enable), td=str(tau_dict)))
 
