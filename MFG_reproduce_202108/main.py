@@ -18,8 +18,8 @@ training_mode = int(sys.argv[1])
 seed = 123
 GPU_device = "1"
 dump_prediction_cif = False
-load_old_model_enable = True
-predict_before_dataclean = True
+load_old_model_enable = False
+predict_before_dataclean = False
 training_new_model = True
 
 tau_modify_enable = False
