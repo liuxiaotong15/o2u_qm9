@@ -15,8 +15,8 @@ from megnet.callbacks import XiaotongCB
 
 import sys
 training_mode = int(sys.argv[1])
-seed = 123
-GPU_device = "1"
+seed = 1234
+GPU_device = "0"
 dump_prediction_cif = False
 load_old_model_enable = False
 predict_before_dataclean = False
@@ -319,7 +319,7 @@ if training_new_model:
             model.save_model(dump_model_name+'_'+str(i)+'.hdf5')
             idx += data_size[i]
             prediction(model)
-    elif training_mode == 11: # (all -> all-PBE -> all-PBE-HSE -> ...) *2  -> part EXP with 20% validation
+    elif training_mode == 12: # (all -> all-PBE -> all-PBE-HSE -> ...) *2  -> part EXP with 20% validation
         idx = 0
         for i in range(len(data_size)-1):
             s = structures[idx:]
