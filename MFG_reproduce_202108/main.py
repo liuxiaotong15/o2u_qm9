@@ -106,13 +106,13 @@ for it in items:
     sp_lst = []
     for i in r:
         structures.append(Structure.from_str(df[it+'_structure'][i], fmt='cif'))
-        sp_lst.extend(structures[-1].species)
+        sp_lst.extend(list(set(structures[-1].species)))
         if tau_modify_enable:
             targets.append(df[it+'_gap'][i] * tau_dict[it])
         else:
             targets.append(df[it+'_gap'][i])
         sample_weights.append(1.0/len(r))
-     logging.info('dataset {item}, element dict: {d}'.format(item=it, d=Counter(sp_lst)))
+    logging.info('dataset {item}, element dict: {d}'.format(item=it, d=Counter(sp_lst)))
 logging.info('data size is: {ds}'.format(ds=data_size))
 
 ### load exp data and shuffle
@@ -132,7 +132,9 @@ logging.info('exp data size is: {s}'.format(s=len(s_exp)))
 data_size.append(0)
 r = list(range(len(list(d['ordered_exp'].keys()))))
 random.shuffle(r)
+sp_lst=[]
 for i in r:
+    sp_lst.extend(list(set(s_exp[i].species)))
     if random.random() > 0.5:
         structures.append(s_exp[i])
         targets.append(t_exp[i])
@@ -142,6 +144,7 @@ for i in r:
         test_structures.append(s_exp[i])
         test_targets.append(t_exp[i])
 
+logging.info('dataset EXP, element dict: {d}'.format(item=it, d=Counter(sp_lst)))
 
 # data preprocess part
 if load_old_model_enable:
