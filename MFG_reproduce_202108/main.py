@@ -31,8 +31,8 @@ tau_dict = {'pbe': 1/0.6279685889089127,
 
 # items = ['pbe', 'hse', 'gllb-sc', 'scan']
 # items = ['gllb-sc', 'hse', 'scan', 'pbe']
-items = ['gllb-sc', 'pbe', 'scan', 'hse']
-# items = ['pbe', 'hse']
+# items = ['gllb-sc', 'pbe', 'scan', 'hse']
+items = ['pbe', 'hse']
 
 
 old_model_name = '7075e10_9_4.hdf5'
