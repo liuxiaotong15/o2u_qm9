@@ -15,8 +15,8 @@ from megnet.callbacks import XiaotongCB
 
 import sys
 training_mode = int(sys.argv[1])
-seed = 1234
-GPU_device = "0"
+seed = 12345
+GPU_device = ""
 dump_prediction_cif = False
 load_old_model_enable = False
 predict_before_dataclean = False
@@ -96,21 +96,23 @@ data_size = []
 sample_weights = []
 
 from pymatgen.core.structure import Structure
-
+from collections import Counter
 for it in items:
     csv_name = 'data/' + it + '_cif.csv'
     df = pd.read_csv(csv_name)
     data_size.append(len(df))
     r = list(range(len(df)))
     random.shuffle(r)
+    sp_lst = []
     for i in r:
         structures.append(Structure.from_str(df[it+'_structure'][i], fmt='cif'))
+        sp_lst.extend(structures[-1].species)
         if tau_modify_enable:
             targets.append(df[it+'_gap'][i] * tau_dict[it])
         else:
             targets.append(df[it+'_gap'][i])
         sample_weights.append(1.0/len(r))
-
+     logging.info('dataset {item}, element dict: {d}'.format(item=it, d=Counter(sp_lst)))
 logging.info('data size is: {ds}'.format(ds=data_size))
 
 ### load exp data and shuffle
