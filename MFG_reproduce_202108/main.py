@@ -16,7 +16,7 @@ from megnet.callbacks import XiaotongCB
 import sys
 training_mode = int(sys.argv[1])
 seed = 123
-GPU_device = "0"
+GPU_device = "1"
 dump_prediction_cif = False
 load_old_model_enable = True
 predict_before_dataclean = True
@@ -39,7 +39,7 @@ old_model_name = '7075e10_9_4.hdf5'
 # old_model_name = '249acf2_9_123_4.hdf5'
 # old_model_name = 'c5ddc72_9_123_4.hdf5'
 # old_model_name = '1d8f4bd_9_123_4.hdf5'
-cut_value = 0.2
+cut_value = 0.3
 
 random.seed(seed)
 np.random.seed(seed)
@@ -183,7 +183,7 @@ mean is: {mean}'.format(std=np.std(diff_lst),
 #         n1=4, n2=4, n3=4, npass=1, ntarget=1,
 #         graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 
-model = MEGNetModel(nfeat_edge=10, nfeat_global=2, lr=1e-4, graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
+model = MEGNetModel(nfeat_edge=10, nfeat_global=2, graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 
 ep = 5000
 callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=True)
@@ -306,6 +306,53 @@ if training_new_model:
             l = len(s)
             if training_mode == 9:
                 sw = None
+            model.train(s[:int(0.8*l)], t[:int(0.8*l)],
+                    validation_structures=s[int(0.8*l):],
+                    validation_targets=t[int(0.8*l):],
+                    # callbacks=[callback, XiaotongCB((test_input, test_targets), commit_id)],
+                    callbacks=[callback],
+                    save_checkpoint=False,
+                    automatic_correction=False,
+                    sample_weights=sw,
+                    batch_size = 512,
+                    epochs=ep)
+            model.save_model(dump_model_name+'_'+str(i)+'.hdf5')
+            idx += data_size[i]
+            prediction(model)
+    elif training_mode == 11: # (all -> all-PBE -> all-PBE-HSE -> ...) *2  -> part EXP with 20% validation
+        idx = 0
+        for i in range(len(data_size)-1):
+            s = structures[idx:]
+            t = targets[idx:]
+            sw = sample_weights[idx:]
+            c = list(zip(s, t, sw))
+            random.shuffle(c)
+            s, t, sw = zip(*c)
+            l = len(s)
+            sw = None
+            model.train(s[:int(0.8*l)], t[:int(0.8*l)],
+                    validation_structures=s[int(0.8*l):],
+                    validation_targets=t[int(0.8*l):],
+                    # callbacks=[callback, XiaotongCB((test_input, test_targets), commit_id)],
+                    callbacks=[callback],
+                    save_checkpoint=False,
+                    automatic_correction=False,
+                    sample_weights=sw,
+                    batch_size = 512,
+                    epochs=ep)
+            model.save_model(dump_model_name+'_'+str(i)+'.hdf5')
+            idx += data_size[i]
+            prediction(model)
+        idx = 0
+        for i in range(len(data_size)):
+            s = structures[idx:]
+            t = targets[idx:]
+            sw = sample_weights[idx:]
+            c = list(zip(s, t, sw))
+            random.shuffle(c)
+            s, t, sw = zip(*c)
+            l = len(s)
+            sw = None
             model.train(s[:int(0.8*l)], t[:int(0.8*l)],
                     validation_structures=s[int(0.8*l):],
                     validation_targets=t[int(0.8*l):],
