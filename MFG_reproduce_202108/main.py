@@ -15,10 +15,10 @@ from megnet.callbacks import XiaotongCB
 
 import sys
 training_mode = int(sys.argv[1])
-seed = 12345
-GPU_device = ""
+seed = 123
+GPU_device = "0"
 dump_prediction_cif = False
-load_old_model_enable = False
+load_old_model_enable = True
 predict_before_dataclean = False
 training_new_model = True
 
@@ -31,14 +31,16 @@ tau_dict = {'pbe': 1/0.6279685889089127,
 
 # items = ['pbe', 'hse', 'gllb-sc', 'scan']
 # items = ['gllb-sc', 'hse', 'scan', 'pbe']
+# items = ['gllb-sc', 'scan', 'hse', 'pbe']
 # items = ['gllb-sc', 'pbe', 'scan', 'hse']
 items = ['pbe', 'hse']
 
 
-old_model_name = '7075e10_9_4.hdf5'
+# old_model_name = '7075e10_9_4.hdf5'
 # old_model_name = '249acf2_9_123_4.hdf5'
 # old_model_name = 'c5ddc72_9_123_4.hdf5'
 # old_model_name = '1d8f4bd_9_123_4.hdf5'
+old_model_name = '0d7e70c_12_12345_2.hdf5'
 cut_value = 0.3
 
 random.seed(seed)
