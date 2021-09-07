@@ -31,7 +31,7 @@ scan_dict = species_str2dict(ele_str, scan)
 
 el_lst = []
 for el in periodictable.elements: 
-    if el.symbol in set(list(exp_dict.keys()) + list(pbe_dict.keys()) + list(gllb_dict.keys()) + list(hse_dict.keys()) + list(scan_dict.keys())):
+    if el.symbol in set(list(exp_dict.keys()) + list(pbe_dict.keys()) + list(hse_dict.keys())):
         el_lst.append(el.symbol)
 
 print(el_lst)
@@ -48,36 +48,44 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 x = np.arange(len(el_lst))  # the label locations
-width = 0.15  # the width of the bars
+width = 0.25  # the width of the bars
 
 fig, ax = plt.subplots()
-ax.bar(x - width*2, np.array(exp_y)/max(exp_y), width, label='EXP')
 
 # Add some text for labels, title and custom x-axis tick labels, etc.
 # ax.set_ylabel('Scores')
 # ax.set_title('Scores by group and gender')
 ax.set_xticks(x)
 ax.set_xticklabels(el_lst, rotation = 75)# , ha="right")
-
+ax.set_ylim(0, 1.5)
 # ax.bar_label(rects1, padding=3)
 # ax.bar_label(rects2, padding=3)
 
-dft_str = ['gllb', 'pbe', 'hse', 'scan']
-for idx, ss in enumerate([gllb, pbe, hse, scan]):
-    dft_dict = species_str2dict(ele_str, ss)
-    print(len(dft_dict))
-    dft_y = []
-    for e in el_lst:
-        if e in dft_dict.keys():
-            dft_y.append(dft_dict[e])
-        else:
-            dft_y.append(0)
+pbe_dict = species_str2dict(ele_str, pbe)
+pbe_y = []
+for e in el_lst:
+    if e in pbe_dict.keys():
+        pbe_y.append(pbe_dict[e])
+    else:
+        pbe_y.append(0)
 
-    ax.bar(x + width*(idx-1), np.array(dft_y)/max(dft_y), width, label=dft_str[idx])
- 
+hse_dict = species_str2dict(ele_str, hse)
+hse_y = []
+for e in el_lst:
+    if e in hse_dict.keys():
+        hse_y.append(hse_dict[e])
+    else:
+        hse_y.append(0)
 
+max_array = np.maximum(np.maximum(np.log(np.array(pbe_y)), np.log(np.array(hse_y))), np.log(np.array(exp_y)))
+
+ax.bar(x, np.log(np.array(pbe_y))/max_array, width, label='PBE')
+ax.bar(x + width, np.log(np.array(hse_y))/max_array, width, label='HSE')
+ax.bar(x - width, np.log(np.array(exp_y))/max_array, width, label='EXP')
 
 ax.legend()
 fig.tight_layout()
+for i in range(len(pbe_y)):
+    plt.text(i-0.2, 1.1, pbe_y[i], rotation = 75)
 plt.show()
 
