@@ -15,8 +15,8 @@ from megnet.callbacks import XiaotongCB
 
 import sys
 training_mode = int(sys.argv[1])
-seed = 123
-GPU_device = "1"
+seed = 1234
+GPU_device = "0"
 dump_prediction_cif = False
 load_old_model_enable = True
 predict_before_dataclean = False
@@ -41,7 +41,7 @@ items = ['pbe', 'hse']
 # old_model_name = 'c5ddc72_9_123_4.hdf5'
 # old_model_name = '1d8f4bd_9_123_4.hdf5'
 old_model_name = 'fe32ec4_12_1234_2.hdf5'
-cut_value = 0.5
+cut_value = 0.1
 
 random.seed(seed)
 np.random.seed(seed)
