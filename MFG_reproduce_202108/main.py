@@ -15,8 +15,8 @@ from megnet.callbacks import XiaotongCB
 
 import sys
 training_mode = int(sys.argv[1])
-seed = 1234
-GPU_device = "0"
+seed = 123
+GPU_device = "1"
 dump_prediction_cif = False
 load_old_model_enable = True
 predict_before_dataclean = False
@@ -32,8 +32,8 @@ tau_dict = {'pbe': 1/0.6279685889089127,
 # items = ['pbe', 'hse', 'gllb-sc', 'scan']
 # items = ['gllb-sc', 'hse', 'scan', 'pbe']
 # items = ['gllb-sc', 'scan', 'hse', 'pbe']
-# items = ['gllb-sc', 'pbe', 'scan', 'hse']
-items = ['pbe', 'scan', 'hse', 'gllb-sc']
+items = ['gllb-sc', 'pbe', 'scan', 'hse']
+# items = ['pbe', 'scan', 'hse', 'gllb-sc']
 # items = ['pbe', 'hse']
 
 
