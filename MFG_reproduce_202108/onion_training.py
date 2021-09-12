@@ -167,7 +167,6 @@ if load_old_model_enable:
 mean is: {mean}'.format(std=np.std(diff_lst),
                 mean=np.mean(diff_lst)))
 
-    # for sz in data_size[:-1]:
     for it in items:
         error_lst = []
         prediction_lst = []
@@ -186,7 +185,7 @@ mean is: {mean}'.format(std=np.std(diff_lst),
             dc=len(targets_lst), std_orig=np.std(targets_lst), std_model=np.std(prediction_lst)))
         logging.info('Data count: {dc}, Mean orig: {mean_orig}, Mean_model: {mean_model}'.format(
             dc=len(targets_lst), mean_orig=np.mean(targets_lst), mean_model=np.mean(prediction_lst)))
-        f = open(dump_model_name + '_'+ str(sz) + '.txt', 'wb') # to store and analyze the error
+        f = open(dump_model_name + '_'+ it + '.txt', 'wb') # to store and analyze the error
         pickle.dump(error_lst, f)
         f.close()
 
