@@ -16,11 +16,12 @@ from megnet.callbacks import XiaotongCB
 import sys
 training_mode = int(sys.argv[1])
 seed = 123
-GPU_device = "0"
+GPU_device = "1"
 dump_prediction_cif = False
 load_old_model_enable = False
 predict_before_dataclean = False
 training_new_model = True
+contain_e1_in_every_node = False
 
 tau_modify_enable = False
 # tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H, S, G # min(MSE)
@@ -86,6 +87,8 @@ logging.info('training_mode is: {tm}'.format(tm=training_mode))
 logging.info('device number is: GPU_{d}'.format(d=GPU_device))
 
 logging.info('items is {it}'.format(it=str(items)))
+logging.info('contain E1 in every node is {e}'.format(e=str(contain_e1_in_every_node)))
+
 logging.info('tau_enable={t} and tau_dict is {td}'.format(
     t=str(tau_modify_enable), td=str(tau_dict)))
 
@@ -195,7 +198,7 @@ mean is: {mean}'.format(std=np.std(diff_lst),
 
 model = MEGNetModel(nfeat_edge=10, nfeat_global=2, graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 model.save_model(dump_model_name+'_init_randomly' + '.hdf5')
-init_model_tag = 'GPHS'
+init_model_tag = 'EGPHS'
 
 ep = 5000
 callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=True)
@@ -211,8 +214,9 @@ def construct_dataset_from_str(db_short_str):
     for i in range(len(db_short_str)):
         s.extend(structures[db_short_full_dict[db_short_str[i]]])
         t.extend(targets[db_short_full_dict[db_short_str[i]]])
-    s.extend(structures['E1'])
-    t.extend(targets['E1'])
+    if contain_e1_in_every_node:
+        s.extend(structures['E1'])
+        t.extend(targets['E1'])
     c = list(zip(s, t))
     random.shuffle(c)
     s, t = zip(*c)
@@ -223,7 +227,8 @@ def find_sub_tree(cur_tag, history_tag):
     father_model_name = dump_model_name + '_' + history_tag + '.hdf5'
     history_tag += '_'
     history_tag += cur_tag
-    history_tag += 'E1'
+    if contain_e1_in_every_node:
+        history_tag += 'E1'
     cur_model_name = dump_model_name + '_' + history_tag + '.hdf5'
     cur_model = MEGNetModel.from_file(father_model_name)
     ###### get dataset ######
