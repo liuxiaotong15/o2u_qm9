@@ -255,7 +255,7 @@ def find_sub_tree(cur_tag, history_tag):
         for i in range(len(cur_tag)):
             next_tag = cur_tag[:i] + cur_tag[i+1:]
             find_sub_tree(next_tag, history_tag)
-    else:
+    elif contain_e1_in_every_node:
     ####### extra E1 training ##
         s, t = construct_dataset_from_str('')
         l = len(s)
@@ -274,6 +274,8 @@ def find_sub_tree(cur_tag, history_tag):
             mae = prediction(cur_model)
             logging.info('MAE of {h}_E1 is: {mae}'.format(h=history_tag, mae=mae))
         cur_model.save_model(dump_model_name + '_' + history_tag + '_E1.hdf5')
+    else:
+        pass
         
 
 find_sub_tree(init_model_tag, 'init_randomly')
