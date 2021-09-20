@@ -7,6 +7,7 @@ import tensorflow as tf
 # tf.compat.v1.disable_eager_execution()
 
 import os
+import gc
 
 from megnet.data.crystal import CrystalGraph
 from megnet.data.graph import GaussianDistance
@@ -251,6 +252,7 @@ def find_sub_tree(cur_tag, history_tag):
         logging.info('MAE of {tag} is: {mae}'.format(tag=history_tag, mae=mae))
     cur_model.save_model(cur_model_name)
     del s, t, l
+    gc.collect()
     ###### next level #######
     if len(cur_tag) > 1:
         for i in range(len(cur_tag)):
