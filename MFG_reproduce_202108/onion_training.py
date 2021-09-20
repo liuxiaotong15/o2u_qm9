@@ -16,19 +16,19 @@ from megnet.callbacks import XiaotongCB
 import sys
 training_mode = int(sys.argv[1])
 seed = 123
-GPU_device = "0"
+GPU_device = "1"
 dump_prediction_cif = False
 load_old_model_enable = True
 predict_before_dataclean = False
 training_new_model = True
 contain_e1_in_every_node = False
 
-tau_modify_enable = False
-# tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H, S, G # min(MSE)
-tau_dict = {'pbe': 1/0.6279685889089127,
-            'hse': 1/0.7774483582697933,
-            'scan': 1/0.7430766771711287,
-            'gllb-sc': 1/1.0419268013851504} # P, H, S, G # min(MAE)
+tau_modify_enable = True
+tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H, S, G # min(MSE)
+# tau_dict = {'pbe': 1/0.6279685889089127,
+#             'hse': 1/0.7774483582697933,
+#             'scan': 1/0.7430766771711287,
+#             'gllb-sc': 1/1.0419268013851504} # P, H, S, G # min(MAE)
 
 # items = ['pbe', 'hse', 'gllb-sc', 'scan']
 # items = ['gllb-sc', 'hse', 'scan', 'pbe']
@@ -250,6 +250,7 @@ def find_sub_tree(cur_tag, history_tag):
         mae = prediction(cur_model)
         logging.info('MAE of {tag} is: {mae}'.format(tag=history_tag, mae=mae))
     cur_model.save_model(cur_model_name)
+    del s, t, l
     ###### next level #######
     if len(cur_tag) > 1:
         for i in range(len(cur_tag)):
