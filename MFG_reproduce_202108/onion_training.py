@@ -17,9 +17,9 @@ from megnet.callbacks import XiaotongCB
 import sys
 training_mode = int(sys.argv[1])
 seed = 123
-GPU_device = "1"
+GPU_device = "0"
 dump_prediction_cif = False
-load_old_model_enable = True
+load_old_model_enable = False
 predict_before_dataclean = False
 training_new_model = True
 contain_e1_in_every_node = False
