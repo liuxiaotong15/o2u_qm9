@@ -24,7 +24,7 @@ predict_before_dataclean = False
 training_new_model = True
 contain_e1_in_every_node = False
 
-tau_modify_enable = True
+tau_modify_enable = False
 tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H, S, G # min(MSE)
 # tau_dict = {'pbe': 1/0.6279685889089127,
 #             'hse': 1/0.7774483582697933,
@@ -48,6 +48,8 @@ cut_value = 0.3
 
 random.seed(seed)
 np.random.seed(seed)
+tf.random.set_seed(seed)
+
 commit_id = str(os.popen('git --no-pager log -1 --oneline --pretty=format:"%h"').read())
 
 dump_model_name = '{commit_id}_{training_mode}_{seed}'.format(commit_id=commit_id, 
