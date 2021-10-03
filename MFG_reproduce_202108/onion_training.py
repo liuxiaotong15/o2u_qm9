@@ -12,7 +12,7 @@ import gc
 from megnet.data.crystal import CrystalGraph
 from megnet.data.graph import GaussianDistance
 from megnet.models import MEGNetModel
-from megnet.callbacks import XiaotongCB
+# from megnet.callbacks import XiaotongCB
 
 import sys
 training_mode = int(sys.argv[1])
