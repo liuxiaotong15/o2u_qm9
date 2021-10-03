@@ -23,8 +23,14 @@ load_old_model_enable = False
 predict_before_dataclean = False
 training_new_model = True
 contain_e1_in_every_node = False
-
+swap_E1_test = False
 tau_modify_enable = False
+
+if training_mode<8 and training_mode >=0:
+    swap_E1_test = bool(training_mode&1)
+    load_old_model_enable = bool(training_mode&2)
+    tau_modify_enable = bool(training_mode&4)
+
 tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H, S, G # min(MSE)
 # tau_dict = {'pbe': 1/0.6279685889089127,
 #             'hse': 1/0.7774483582697933,
@@ -152,6 +158,10 @@ for i in r:
     else:
         test_structures.append(s_exp[i])
         test_targets.append(t_exp[i])
+
+if swap_E1_test:
+    structures['E1'], test_structures = test_structures, structures['E1']
+    targets['E1'], test_targets = test_targets, targets['E1']
 
 logging.info('dataset EXP, element dict: {d}'.format(item=it, d=Counter(sp_lst)))
 
