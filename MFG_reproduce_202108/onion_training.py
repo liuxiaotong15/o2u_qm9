@@ -103,9 +103,9 @@ logging.info('contain E1 in every node is {e}'.format(e=str(contain_e1_in_every_
 logging.info('tau_enable={t} and tau_dict is {td}'.format(
     t=str(tau_modify_enable), td=str(tau_dict)))
 
-
 logging.info('load_old_model_enable={l}, old_model_name={omn}, cut_value={cv}'.format(
     l=load_old_model_enable, omn=old_model_name, cv=cut_value))
+logging.info('swap_E1_test={b}'.format(b=str(swap_E1_test)))
 logging.info('predict_before_dataclean={p}, training_new_model={t}'.format(
     p=predict_before_dataclean, t=training_new_model))
 
