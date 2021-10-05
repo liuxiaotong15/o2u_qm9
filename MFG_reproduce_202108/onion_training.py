@@ -17,7 +17,8 @@ from megnet.models import MEGNetModel
 import sys
 training_mode = int(sys.argv[1])
 seed = 123
-GPU_device = "0"
+GPU_seed = 1234
+GPU_device = "1"
 dump_prediction_cif = False
 load_old_model_enable = False
 predict_before_dataclean = False
@@ -54,7 +55,7 @@ cut_value = 0.3
 
 random.seed(seed)
 np.random.seed(seed)
-tf.random.set_seed(seed)
+tf.random.set_seed(GPU_seed)
 
 commit_id = str(os.popen('git --no-pager log -1 --oneline --pretty=format:"%h"').read())
 
@@ -94,6 +95,7 @@ logging.info('onion training is running, the whole training process likes a tree
 logging.info('commit_id is: {cid}'.format(cid=commit_id))
 logging.info('training_mode is: {tm}'.format(tm=training_mode))
 logging.info('device number is: GPU_{d}'.format(d=GPU_device))
+logging.info('GPU seed is: {d}'.format(d=GPU_seed))
 
 logging.info('items is {it}'.format(it=str(items)))
 logging.info('contain E1 in every node is {e}'.format(e=str(contain_e1_in_every_node)))
