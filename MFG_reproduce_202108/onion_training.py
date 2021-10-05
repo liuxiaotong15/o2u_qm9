@@ -17,8 +17,8 @@ from megnet.models import MEGNetModel
 import sys
 training_mode = int(sys.argv[1])
 seed = 123
-GPU_seed = 1234
-GPU_device = "1"
+GPU_seed = 12345
+GPU_device = "0"
 dump_prediction_cif = False
 load_old_model_enable = False
 predict_before_dataclean = False
