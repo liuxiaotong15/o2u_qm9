@@ -17,7 +17,7 @@ from megnet.models import MEGNetModel
 import sys
 training_mode = int(sys.argv[1])
 seed = 123
-GPU_seed = 12345
+GPU_seed = 11111
 GPU_device = "0"
 dump_prediction_cif = False
 load_old_model_enable = False
@@ -27,10 +27,10 @@ contain_e1_in_every_node = False
 swap_E1_test = False
 tau_modify_enable = False
 
-if training_mode<8 and training_mode >=0:
+if training_mode<4 and training_mode >=0:
     swap_E1_test = bool(training_mode&1)
     load_old_model_enable = bool(training_mode&2)
-    tau_modify_enable = bool(training_mode&4)
+    # tau_modify_enable = bool(training_mode&4)
 
 tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H, S, G # min(MSE)
 # tau_dict = {'pbe': 1/0.6279685889089127,
