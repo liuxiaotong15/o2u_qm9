@@ -1,8 +1,10 @@
 import re
 import numpy as np
 
-root = './bak_files_20210929/'
-filenames = ["80c5815_0_123.log", "fe977d4_0_123.log", "6a33607_0_123.log", "e19744f_0_123.log"]
+# root = './bak_files_20210929/'
+# filenames = ["80c5815_0_123.log", "fe977d4_0_123.log", "6a33607_0_123.log", "e19744f_0_123.log"]
+root = './'
+filenames = ["02923e5_1_123.log", "02923e5_0_123.log"]
 
 for filename in filenames:
     print(root+filename)

@@ -18,19 +18,24 @@ import sys
 training_mode = int(sys.argv[1])
 seed = 123
 GPU_seed = 11111
-GPU_device = "0"
+GPU_device = "1"
 dump_prediction_cif = False
-load_old_model_enable = False
+load_old_model_enable = True
 predict_before_dataclean = False
 training_new_model = True
 contain_e1_in_every_node = False
 swap_E1_test = False
 tau_modify_enable = False
 
-if training_mode<4 and training_mode >=0:
+if training_mode in [0, 1]:
     swap_E1_test = bool(training_mode&1)
-    load_old_model_enable = bool(training_mode&2)
-    # tau_modify_enable = bool(training_mode&4)
+    if training_mode == 0:
+        old_model_name = '02923e5_0_123_init_randomly_EGPHS_GPHS_GPS_GP_G.hdf5'
+    elif training_mode == 1:
+        old_model_name = '02923e5_1_123_init_randomly_EGPHS_GPHS_GPS_GP_G.hdf5'
+    else:
+        pass
+
 
 tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H, S, G # min(MSE)
 # tau_dict = {'pbe': 1/0.6279685889089127,
