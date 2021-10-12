@@ -18,7 +18,7 @@ import sys
 training_mode = int(sys.argv[1])
 seed = 123
 GPU_seed = 11111
-GPU_device = "1"
+GPU_device = "0"
 dump_prediction_cif = False
 load_old_model_enable = True
 predict_before_dataclean = False
@@ -51,7 +51,7 @@ items = ['gllb-sc', 'pbe', 'scan', 'hse']
 # items = ['pbe', 'hse']
 
 
-old_model_name = '7075e10_9_4.hdf5'
+# old_model_name = '7075e10_9_4.hdf5'
 # old_model_name = '249acf2_9_123_4.hdf5'
 # old_model_name = 'c5ddc72_9_123_4.hdf5'
 # old_model_name = '1d8f4bd_9_123_4.hdf5'
