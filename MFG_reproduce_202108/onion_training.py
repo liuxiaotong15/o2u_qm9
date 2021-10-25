@@ -31,10 +31,12 @@ if training_mode in [0, 1]:
     swap_E1_test = bool(training_mode&1)
     if training_mode == 0:
         # old_model_name = '02923e5_0_123_init_randomly_EGPHS_GPHS_GPS_GP_G.hdf5' # worst of all
-        old_model_name = '02923e5_0_123_init_randomly_EGPHS_EGPH_EGP_EG_E.hdf5' # worst of ending E
+        # old_model_name = '02923e5_0_123_init_randomly_EGPHS_EGPH_EGP_EG_E.hdf5' # worst of ending E
+        old_model_name = '02923e5_0_123_init_randomly_EGPHS_EPHS_EPH_EH_E.hdf5' # best of all
     elif training_mode == 1:
         # old_model_name = '02923e5_1_123_init_randomly_EGPHS_GPHS_GPS_GP_G.hdf5' # worst of all
-        old_model_name = '02923e5_1_123_init_randomly_EGPHS_EGPH_EGP_EG_E.hdf5' # worst of ending E
+        # old_model_name = '02923e5_1_123_init_randomly_EGPHS_EGPH_EGP_EG_E.hdf5' # worst of ending E
+        old_model_name = '02923e5_1_123_init_randomly_EGPHS_EPHS_EPH_EH_E.hdf5' # best of all
     else:
         pass
 
