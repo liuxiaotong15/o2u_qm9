@@ -18,7 +18,7 @@ import sys
 training_mode = int(sys.argv[1])
 seed = 123
 GPU_seed = 11111
-GPU_device = "1"
+GPU_device = ""
 dump_prediction_cif = False
 load_old_model_enable = False
 predict_before_dataclean = False
