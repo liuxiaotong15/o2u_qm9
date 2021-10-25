@@ -221,7 +221,7 @@ mean is: {mean}'.format(std=np.std(diff_lst),
 #         graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 
 model = MEGNetModel(nfeat_edge=10, nfeat_global=2, graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
-model.save_model(dump_model_name+'_init_randomly' + '.hdf5')
+model.save_model(dump_model_name+'1by1_init_randomly' + '.hdf5')
 init_model_tag = 'EGPHS'
 
 ep = 5000
