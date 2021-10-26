@@ -243,11 +243,12 @@ def construct_dataset_from_str(db_short_str):
     s, t = zip(*c)
     return s, t
 
-def find_sub_tree(cur_tag, history_tag):
+def find_sub_tree(cur_tag, input_history_tag):
     ###### load model #######
-    father_model_name = dump_model_name + '_' + history_tag + '.hdf5'
+    father_model_name = dump_model_name + '_' + input_history_tag + '.hdf5'
     #########################
     for db_str in cur_tag:
+        history_tag = input_history_tag
         history_tag += '_'
         history_tag += db_str
         cur_model_name = dump_model_name + '_' + history_tag + '.hdf5'
@@ -275,7 +276,8 @@ def find_sub_tree(cur_tag, history_tag):
         gc.collect()
         ###### next level #######
         if len(cur_tag) > 1:
-            next_tag = cur_tag.replace(db_str, '')
+            tmp_tag = cur_tag
+            next_tag = tmp_tag.replace(db_str, '')
             find_sub_tree(next_tag, history_tag)
         else:
             pass
