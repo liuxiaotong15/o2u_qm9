@@ -27,6 +27,8 @@ contain_e1_in_every_node = False
 swap_E1_test = False
 tau_modify_enable = False
 
+trained_last_time = True
+
 if training_mode in [0, 1]:
     swap_E1_test = bool(training_mode&1)
     if training_mode == 0:
@@ -108,6 +110,7 @@ logging.info('GPU seed is: {d}'.format(d=GPU_seed))
 
 logging.info('items is {it}'.format(it=str(items)))
 logging.info('contain E1 in every node is {e}'.format(e=str(contain_e1_in_every_node)))
+logging.info('trained_last_time is {e}'.format(e=str(trained_last_time)))
 
 logging.info('tau_enable={t} and tau_dict is {td}'.format(
     t=str(tau_modify_enable), td=str(tau_dict)))
@@ -223,6 +226,7 @@ mean is: {mean}'.format(std=np.std(diff_lst),
 model = MEGNetModel(nfeat_edge=10, nfeat_global=2, graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 model.save_model(dump_model_name+'_init_randomly' + '.hdf5')
 init_model_tag = 'EGPHS'
+start_model_tag = 'EGPHS'
 
 ep = 5000
 callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=True)
@@ -247,41 +251,47 @@ def construct_dataset_from_str(db_short_str):
     return s, t
 
 def find_sub_tree(cur_tag, history_tag):
-    ###### load model #######
-    father_model_name = dump_model_name + '_' + history_tag + '.hdf5'
-    history_tag += '_'
-    history_tag += cur_tag
-    if contain_e1_in_every_node:
-        history_tag += 'E1'
-    cur_model_name = dump_model_name + '_' + history_tag + '.hdf5'
-    cur_model = MEGNetModel.from_file(father_model_name)
-    ###### get dataset ######
-    s, t = construct_dataset_from_str(cur_tag)
-    l = len(s)
-    ###### train ############
-    try:
-        cur_model.train(s[:int(0.8*l)], t[:int(0.8*l)],
-                    validation_structures=s[int(0.8*l):],
-                    validation_targets=t[int(0.8*l):],
-                    callbacks=[callback],
-                    save_checkpoint=False,
-                    automatic_correction=False,
-                    batch_size = 512,
-                    epochs=ep)
-    except TypeError:
-        logging.info('MAE of {tag} is: {mae}'.format(tag=history_tag, mae='nan'))
+    if init_model_tag == start_model_tag or trained_last_time == False:
+        global trained_last_time
+        trained_last_time = False
+        ###### load model #######
+        father_model_name = dump_model_name + '_' + history_tag + '.hdf5'
+        history_tag += '_'
+        history_tag += cur_tag
+        if contain_e1_in_every_node:
+            history_tag += 'E1'
+        cur_model_name = dump_model_name + '_' + history_tag + '.hdf5'
+        cur_model = MEGNetModel.from_file(father_model_name)
+        ###### get dataset ######
+        s, t = construct_dataset_from_str(cur_tag)
+        l = len(s)
+        ###### train ############
+        try:
+            cur_model.train(s[:int(0.8*l)], t[:int(0.8*l)],
+                        validation_structures=s[int(0.8*l):],
+                        validation_targets=t[int(0.8*l):],
+                        callbacks=[callback],
+                        save_checkpoint=False,
+                        automatic_correction=False,
+                        batch_size = 512,
+                        epochs=ep)
+        except TypeError:
+            logging.info('MAE of {tag} is: {mae}'.format(tag=history_tag, mae='nan'))
+        else:
+            mae = prediction(cur_model)
+            logging.info('MAE of {tag} is: {mae}'.format(tag=history_tag, mae=mae))
+        cur_model.save_model(cur_model_name)
+        del s, t, l
+        gc.collect()
     else:
-        mae = prediction(cur_model)
-        logging.info('MAE of {tag} is: {mae}'.format(tag=history_tag, mae=mae))
-    cur_model.save_model(cur_model_name)
-    del s, t, l
-    gc.collect()
+        logging.info('cur_tag is {ct}, trained_last_time is {e}'.format(
+            ct=str(cur_tag), e=str(trained_last_time)))
     ###### next level #######
     if len(cur_tag) > 1:
         for i in range(len(cur_tag)):
             next_tag = cur_tag[:i] + cur_tag[i+1:]
             find_sub_tree(next_tag, history_tag)
-    elif contain_e1_in_every_node:
+    elif contain_e1_in_every_node and trained_last_time == False:
     ####### extra E1 training ##
         s, t = construct_dataset_from_str('')
         l = len(s)
