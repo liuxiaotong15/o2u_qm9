@@ -1,10 +1,14 @@
+import collections
 import re
 import numpy as np
 
 # root = './bak_files_20210929/'
 # filenames = ["80c5815_0_123.log", "fe977d4_0_123.log", "6a33607_0_123.log", "e19744f_0_123.log"]
 root = './'
-filenames = ["02923e5_1_123.log", "02923e5_0_123.log"]
+# filenames = ["02923e5_1_123.log", "02923e5_0_123.log"]
+# filenames = ["ff14c38_0_123.log", "ff14c38_1_123.log"]
+# filenames = ["ff4e437_0_123.log", "ff4e437_1_123.log"]
+filenames = ["a367e11_0_123.log", "a367e11_1_123.log"]
 
 for filename in filenames:
     print(root+filename)
@@ -17,6 +21,10 @@ for filename in filenames:
     max_ending_e_mae, min_ending_e_mae = 0, 100
     with open(root+filename, 'r') as f:
         for line in f.readlines():
+            cc = collections.Counter(line)
+            # 1by1 all dataset training once == 8 '_' in the string...
+            # if cc['_'] != 8:
+            #     continue
             status = re.match(r'.*(tau_enable|load_old_model_enable|EGPHS\ is).*', line.strip())
             if status:
                 print(line.strip())
@@ -38,7 +46,7 @@ for filename in filenames:
                     value_dict[key].append(number)
                     if key == 'E':
                         if number > max_ending_e_mae:
-                            max_ending_e_maei = number
+                            max_ending_e_mae = number
                             worst_ending_e_str = line
                         if number < min_ending_e_mae:
                             min_ending_e_mae = number
