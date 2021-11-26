@@ -34,11 +34,15 @@ if training_mode in [0, 1]:
     if training_mode == 0:
         # old_model_name = '02923e5_0_123_init_randomly_EGPHS_GPHS_GPS_GP_G.hdf5' # worst of all
         # old_model_name = '02923e5_0_123_init_randomly_EGPHS_EGPH_EGP_EG_E.hdf5' # worst of ending E
-        old_model_name = '02923e5_0_123_init_randomly_EGPHS_EPHS_EPH_EH_E.hdf5' # best of all
+        # old_model_name = '02923e5_0_123_init_randomly_EGPHS_EPHS_EPH_EH_E.hdf5' # best of all
+        old_model_name = '02923e5_0_123_init_randomly_EGPHS_EPHS_EHS_EH_E.hdf5' # one of best 
+        GPU_device = "0"
     elif training_mode == 1:
         # old_model_name = '02923e5_1_123_init_randomly_EGPHS_GPHS_GPS_GP_G.hdf5' # worst of all
         # old_model_name = '02923e5_1_123_init_randomly_EGPHS_EGPH_EGP_EG_E.hdf5' # worst of ending E
-        old_model_name = '02923e5_1_123_init_randomly_EGPHS_EPHS_EPH_EH_E.hdf5' # best of all
+        # old_model_name = '02923e5_1_123_init_randomly_EGPHS_EPHS_EPH_EH_E.hdf5' # best of all
+        old_model_name = '02923e5_1_123_init_randomly_EGPHS_EPHS_EHS_EH_E.hdf5' # one of best 
+        GPU_device = "1"
     else:
         pass
 
@@ -228,6 +232,8 @@ model.save_model(dump_model_name+'_init_randomly' + '.hdf5')
 init_model_tag = 'EGPHS'
 start_model_tag = 'EGPHS'
 
+special_path = 'init_randomly_EGPHS_EPHS_EHS_EH_E'
+
 ep = 5000
 callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=True)
 
@@ -251,8 +257,12 @@ def construct_dataset_from_str(db_short_str):
     return s, t
 
 def find_sub_tree(cur_tag, history_tag):
+    global trained_last_time
+    if special_path != '' and history_tag not in special_path:
+        return
+    else:
+        pass
     if init_model_tag == start_model_tag or trained_last_time == False:
-        global trained_last_time
         trained_last_time = False
         ###### load model #######
         father_model_name = dump_model_name + '_' + history_tag + '.hdf5'
