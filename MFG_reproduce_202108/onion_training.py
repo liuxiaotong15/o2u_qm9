@@ -283,7 +283,7 @@ def find_sub_tree(cur_tag, history_tag):
                         callbacks=[callback],
                         save_checkpoint=False,
                         automatic_correction=False,
-                        batch_size = 512,
+                        batch_size = 256,
                         epochs=ep)
         except TypeError:
             logging.info('MAE of {tag} is: {mae}'.format(tag=history_tag, mae='nan'))
@@ -312,7 +312,7 @@ def find_sub_tree(cur_tag, history_tag):
                     callbacks=[callback],
                     save_checkpoint=False,
                     automatic_correction=False,
-                    batch_size = 512,
+                    batch_size = 256,
                     epochs=ep)
         except TypeError:
             logging.info('MAE of {h}_E1 is: {mae}'.format(h=history_tag, mae='nan'))
