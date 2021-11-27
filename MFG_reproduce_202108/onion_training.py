@@ -31,17 +31,12 @@ trained_last_time = True
 
 if training_mode in [0, 1]:
     swap_E1_test = bool(training_mode&1)
+    special_path = 'init_randomly_EGPHS_EGPH_EGP_EG_E'  # worst1
     if training_mode == 0:
-        # old_model_name = '02923e5_0_123_init_randomly_EGPHS_GPHS_GPS_GP_G.hdf5' # worst of all
-        # old_model_name = '02923e5_0_123_init_randomly_EGPHS_EGPH_EGP_EG_E.hdf5' # worst of ending E
-        # old_model_name = '02923e5_0_123_init_randomly_EGPHS_EPHS_EPH_EH_E.hdf5' # best of all
-        old_model_name = '02923e5_0_123_init_randomly_EGPHS_EPHS_EHS_EH_E.hdf5' # one of best 
+        old_model_name = '02923e5_0_123_' + special_path + '.hdf5'
         GPU_device = "0"
     elif training_mode == 1:
-        # old_model_name = '02923e5_1_123_init_randomly_EGPHS_GPHS_GPS_GP_G.hdf5' # worst of all
-        # old_model_name = '02923e5_1_123_init_randomly_EGPHS_EGPH_EGP_EG_E.hdf5' # worst of ending E
-        # old_model_name = '02923e5_1_123_init_randomly_EGPHS_EPHS_EPH_EH_E.hdf5' # best of all
-        old_model_name = '02923e5_1_123_init_randomly_EGPHS_EPHS_EHS_EH_E.hdf5' # one of best 
+        old_model_name = '02923e5_1_123_' + special_path + '.hdf5'
         GPU_device = "1"
     else:
         pass
@@ -231,8 +226,6 @@ model = MEGNetModel(nfeat_edge=10, nfeat_global=2, graph_converter=CrystalGraph(
 model.save_model(dump_model_name+'_init_randomly' + '.hdf5')
 init_model_tag = 'EGPHS'
 start_model_tag = 'EGPHS'
-
-special_path = 'init_randomly_EGPHS_EPHS_EHS_EH_E'
 
 ep = 5000
 callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=True)
