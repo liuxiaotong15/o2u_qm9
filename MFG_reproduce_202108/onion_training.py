@@ -33,7 +33,7 @@ if training_mode in [0, 1]:
     swap_E1_test = bool(training_mode&1)
     special_path = 'init_randomly_EGPHS_EGPH_EGP_EG_E'  # worst1
     # special_path = 'init_randomly_EGPHS_EPHS_EHS_EH_E'  # best
-    last_commit_id = '02923e5'
+    last_commit_id = 'd5648cd'
     if training_mode == 0:
         old_model_name = last_commit_id + '_0_123_' + special_path + '.hdf5'
         GPU_device = "0"
@@ -253,16 +253,17 @@ def construct_dataset_from_str(db_short_str):
 
 def find_sub_tree(cur_tag, history_tag):
     global trained_last_time
-    if special_path != '' and history_tag not in special_path:
-        return
-    else:
-        pass
     if init_model_tag == start_model_tag or trained_last_time == False:
         trained_last_time = False
         ###### load model #######
         father_model_name = dump_model_name + '_' + history_tag + '.hdf5'
         history_tag += '_'
         history_tag += cur_tag
+        if special_path != '' and history_tag not in special_path:
+            return
+        else:
+            pass
+
         if contain_e1_in_every_node:
             history_tag += 'E1'
         cur_model_name = dump_model_name + '_' + history_tag + '.hdf5'
