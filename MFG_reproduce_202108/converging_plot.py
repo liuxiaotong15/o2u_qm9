@@ -13,8 +13,10 @@ y_EGPHS_EGPH_EGP_EG_E = [(0.48663643 + 0.4802916)/2] # 02923e5
 y_EGPHS_EPHS_EHS_EH_E.append((0.3921176 + 0.4073958)/2) # b2ce0b0
 y_EGPHS_EPHS_EHS_EH_E.append((0.39784262 + 0.42954674)/2) # d5648cd
 y_EGPHS_EPHS_EHS_EH_E.append((0.3959625 + 0.44908467)/2) # 1b95780
+y_EGPHS_EPHS_EHS_EH_E.append((0.4015885 + 0.4205016)/2) # 2cc7c8d
 
 y_EGPHS_EGPH_EGP_EG_E.append((0.4363386 + 0.45491073)/2) # 878c18d
+y_EGPHS_EGPH_EGP_EG_E.append((0.42162254 + 0.4436562)/2) # 8332822
 
 ax.plot(list(range(len(y_EGPHS_EPHS_EHS_EH_E))), y_EGPHS_EPHS_EHS_EH_E, c='tab:blue', label='EGPHS-EPHS-EHS-EH-E')
 ax.plot(list(range(len(y_EGPHS_EGPH_EGP_EG_E))), y_EGPHS_EGPH_EGP_EG_E, c='tab:red', label='EGPHS-EGPH-EGP-EG-E')
