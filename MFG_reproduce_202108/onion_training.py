@@ -31,9 +31,10 @@ trained_last_time = True
 
 if training_mode in [0, 1]:
     swap_E1_test = bool(training_mode&1)
-    special_path = 'init_randomly_EGPHS_EGPH_EGP_EG_E'  # worst1
+    special_path = 'init_randomly_EGPHS'  # only full
+    # special_path = 'init_randomly_EGPHS_EGPH_EGP_EG_E'  # worst1
     # special_path = 'init_randomly_EGPHS_EPHS_EHS_EH_E'  # best
-    last_commit_id = 'ab5c964'
+    last_commit_id = '02923e5'
     if training_mode == 0:
         old_model_name = last_commit_id + '_0_123_' + special_path + '.hdf5'
         GPU_device = "0"
