@@ -28,6 +28,7 @@ y_EGPHS_EPHS_EPH_EH_E.append((0.43743765 + 0.41969687)/2) # e2840dc
 y_EGPHS_EPHS_EPH_EH_E.append((0.43375596 + 0.42336014)/2) # 41abe3a
 y_EGPHS_EPHS_EPH_EH_E.append((0.4207398 + 0.41163453)/2) # 974fe4d
 y_EGPHS_EPHS_EPH_EH_E.append((0.4293764 + 0.41935813)/2) # b4ad894
+y_EGPHS_EPHS_EPH_EH_E.append((0.42132148 + 0.42718315)/2) # 2f8a491
 
 y_EGPHS_EGPH_EGP_EG_E.append((0.4363386 + 0.45491073)/2) # 878c18d
 y_EGPHS_EGPH_EGP_EG_E.append((0.42162254 + 0.4436562)/2) # 8332822
@@ -40,7 +41,8 @@ y_EGPHS_EGPH_EGP_EG_E.append((0.41560054 + 0.45912856)/2) # cc394f6
 y_EGPHS_EGPH_EGP_EG_E.append((0.42018202 + 0.4460266)/2) # ab5c964
 y_EGPHS_EGPH_EGP_EG_E.append((0.42871267 + 0.43525925)/2) # 42a782f
 
-y_EGPHS.append(( + )/2) # caa9cd7
+y_EGPHS.append((0.4662436 + 0.4997614)/2) # caa9cd7
+y_EGPHS.append((0.46129665 + 0.4822263)/2) # 18a78db
 
 ax.plot(list(range(len(y_EGPHS_EPHS_EHS_EH_E))), y_EGPHS_EPHS_EHS_EH_E, c='tab:blue', label='EGPHS-EPHS-EHS-EH-E')
 ax.plot(list(range(len(y_EGPHS_EGPH_EGP_EG_E))), y_EGPHS_EGPH_EGP_EG_E, c='tab:red', label='EGPHS-EGPH-EGP-EG-E')
