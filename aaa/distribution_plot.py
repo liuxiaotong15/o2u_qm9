@@ -15,6 +15,7 @@ def draw():
     all_custom_lines = {}
     for s in sets:
         all_custom_lines[s] = Line2D([0], [0], color=colors[s], lw = 2)
+    all_custom_lines["empty"] = Line2D([0], [0], lw = 0)
         
     fig = plt.figure(figsize=(13, 26), constrained_layout=True)
     # gs = fig.add_gridspec(nrows=10, ncols=5, hspace=0.5)
@@ -44,7 +45,6 @@ def draw():
                 for k, mp_id in enumerate(s_id):
                     if mp_id in mps:
                         gap.append(s_gap[k])
-                        
                 mean = np.mean(gap)
                 var = np.var(gap)
                 data[mean] = [s, mean, np.sqrt(var)]
@@ -53,20 +53,35 @@ def draw():
             
             data = sorted(data.items(), key=lambda x:x[0])
             
+            intsec_str = r'on $'
             for key, value in data:
+                if intsec_str[-1] != '$':
+                    intsec_str += ' \cap '
                 custom_lines.append(all_custom_lines[value[0]])
-                custom_word.append(f'{value[0]} ({round(value[1], 2)}, {round(value[2], 2)})')
-            
+                if i == 0:
+                    custom_word.append(f'{value[0]} All ({round(value[1], 2)}, {round(value[2], 2)})')
+                else:
+                    custom_word.append(f'{value[0]} ({round(value[1], 2)}, {round(value[2], 2)})')
+                intsec_str += value[0]
+            intsec_str += '$'
+           
             ax.set_xlim((0, 18))
             ax.set_ylim((0, 1))
             ax.get_yaxis().set_visible(False)
+            ax.get_xaxis().set_visible(False)
             
             # ax.legend(custom_lines, custom_word, bbox_to_anchor =(-1.5, 1.01), loc=8, ncol=5, fontsize = 13)
+            if i>0:
+                custom_lines.append(all_custom_lines['empty'])
+                custom_word.append(intsec_str)
             ax.legend(custom_lines, custom_word)
             ax.tick_params(labelsize=13)
             
+        ax.get_xaxis().set_visible(True)
+        ax.get_xaxis().set_ticks(np.arange(0, 16, 3))
+        ax.set_xlabel('eV')
     # plt.subplots_adjust(top=0.94,bottom=0.01,left=0.005,right=0.99,hspace=0.2,wspace=0.2)
-    # plt.subplots_adjust(top=0.94,bottom=0.040,left=0.040,right=0.99,hspace=0.2,wspace=0.2)
+    plt.subplots_adjust(top=0.99,bottom=0.040,left=0.005,right=0.99,hspace=0.2,wspace=0.2)
     fig.savefig("distribution_v3.pdf")
     plt.show()        
     
