@@ -20,23 +20,24 @@ seed = 123
 GPU_seed = 11111
 GPU_device = "1"
 dump_prediction_cif = False
-load_old_model_enable = False
+load_old_model_enable = True
 predict_before_dataclean = False
 training_new_model = True
 contain_e1_in_every_node = False
 swap_E1_test = False
 tau_modify_enable = False
 
+# a367e11_0_123_1by1_init_randomly_S_G_P_E_H
 if training_mode in [0, 1]:
     swap_E1_test = bool(training_mode&1)
+    special_path = '1by1_init_randomly_S_G_P_E_H'  # best
+    last_commit_id = 'a367e11'
     if training_mode == 0:
-        # old_model_name = '02923e5_0_123_init_randomly_EGPHS_GPHS_GPS_GP_G.hdf5' # worst of all
-        # old_model_name = '02923e5_0_123_init_randomly_EGPHS_EGPH_EGP_EG_E.hdf5' # worst of ending E
-        old_model_name = '02923e5_0_123_init_randomly_EGPHS_EPHS_EPH_EH_E.hdf5' # best of all
+        old_model_name = last_commit_id + '_0_123_' + special_path + '.hdf5'
+        GPU_device = "0"
     elif training_mode == 1:
-        # old_model_name = '02923e5_1_123_init_randomly_EGPHS_GPHS_GPS_GP_G.hdf5' # worst of all
-        # old_model_name = '02923e5_1_123_init_randomly_EGPHS_EGPH_EGP_EG_E.hdf5' # worst of ending E
-        old_model_name = '02923e5_1_123_init_randomly_EGPHS_EPHS_EPH_EH_E.hdf5' # best of all
+        old_model_name = last_commit_id + '_1_123_' + special_path + '.hdf5'
+        GPU_device = "1"
     else:
         pass
 
@@ -251,6 +252,10 @@ def find_sub_tree(cur_tag, input_history_tag):
         history_tag = input_history_tag
         history_tag += '_'
         history_tag += db_str
+        if special_path != '' and history_tag not in special_path:
+            return
+        else:
+            pass
         cur_model_name = dump_model_name + '_' + history_tag + '.hdf5'
         cur_model = MEGNetModel.from_file(father_model_name)
         ###### get dataset ######
