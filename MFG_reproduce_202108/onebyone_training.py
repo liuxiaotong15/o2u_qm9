@@ -253,7 +253,7 @@ def find_sub_tree(cur_tag, input_history_tag):
         history_tag += '_'
         history_tag += db_str
         if special_path != '' and history_tag not in special_path:
-            return
+            continue
         else:
             pass
         cur_model_name = dump_model_name + '_' + history_tag + '.hdf5'
