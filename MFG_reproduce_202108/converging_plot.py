@@ -62,7 +62,7 @@ y_EGPHS.append((0.4823242 + 0.46832398)/2) # e225da0
 y_EGPHS.append((0.47294405 + 0.47484007)/2) # a451992
 y_EGPHS.append((0.47872645 + 0.47592255)/2) # b2e2dcb
 
-y_S_G_P_E_H.append(()/2) #
+# y_S_G_P_E_H.append(()/2) #
 
 ax.plot(list(range(len(y_EGPHS_EPHS_EHS_EH_E))), y_EGPHS_EPHS_EHS_EH_E, c='tab:blue', label='EGPHS-EPHS-EHS-EH-E')
 ax.plot(list(range(len(y_EGPHS_EGPH_EGP_EG_E))), y_EGPHS_EGPH_EGP_EG_E, c='tab:red', label='EGPHS-EGPH-EGP-EG-E')
