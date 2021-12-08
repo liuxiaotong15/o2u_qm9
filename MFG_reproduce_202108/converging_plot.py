@@ -61,14 +61,15 @@ y_EGPHS.append((0.47930935 + 0.46569428)/2) # 67f0e9f
 y_EGPHS.append((0.4823242 + 0.46832398)/2) # e225da0
 y_EGPHS.append((0.47294405 + 0.47484007)/2) # a451992
 y_EGPHS.append((0.47872645 + 0.47592255)/2) # b2e2dcb
+y_EGPHS.append((0.4766461 + 0.4800091)/2) # 96cbfec
 
-# y_S_G_P_E_H.append(()/2) #
+y_S_G_P_E_H.append((0.4673425 + 0.49684522)/2) #
 
 ax.plot(list(range(len(y_EGPHS_EPHS_EHS_EH_E))), y_EGPHS_EPHS_EHS_EH_E, label='EGPHS-EPHS-EHS-EH-E', marker='o')
 ax.plot(list(range(len(y_EGPHS_EGPH_EGP_EG_E))), y_EGPHS_EGPH_EGP_EG_E, label='EGPHS-EGPH-EGP-EG-E', marker='^')
 ax.plot(list(range(len(y_EGPHS_EPHS_EPH_EH_E))), y_EGPHS_EPHS_EPH_EH_E, label='EGPHS-EPHS-EPH-EH-E', marker='*')
 ax.plot(list(range(len(y_EGPHS))), y_EGPHS, label='EGPHS', marker='<')
-ax.plot(list(range(len(y_S_G_P_E_H))), y_S_G_P_E_H, label='S_G_P_E_H', marker='D')
+ax.plot(list(range(len(y_S_G_P_E_H))), y_S_G_P_E_H, label='S-G-P-E-H', marker='D')
 
 # ax.scatter(list(range(len(y_EGPHS_EPHS_EHS_EH_E))), y_EGPHS_EPHS_EHS_EH_E, c='tab:blue', label='')
 # ax.scatter(list(range(len(y_EGPHS_EGPH_EGP_EG_E))), y_EGPHS_EGPH_EGP_EG_E, c='tab:red', label='')
