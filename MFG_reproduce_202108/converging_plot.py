@@ -70,6 +70,7 @@ y_S_G_P_E_H.append((0.4673425 + 0.49684522)/2) # 4f2a524
 y_S_G_P_E_H.append((0.46716988 + 0.5022696)/2) # 9e07ad6
 y_S_G_P_E_H.append((0.46527553 + 0.5055876)/2) # 87aa059
 y_S_G_P_E_H.append((0.47629127 + 0.49670452)/2) # 2c2a499
+y_S_G_P_E_H.append((0.48102254 + 0.51227736)/2) # 1df3baf
 
 ax.plot(list(range(len(y_EGPHS_EPHS_EHS_EH_E))), y_EGPHS_EPHS_EHS_EH_E, label='EGPHS-EPHS-EHS-EH-E', marker='o')
 ax.plot(list(range(len(y_EGPHS_EGPH_EGP_EG_E))), y_EGPHS_EGPH_EGP_EG_E, label='EGPHS-EGPH-EGP-EG-E', marker='^')
