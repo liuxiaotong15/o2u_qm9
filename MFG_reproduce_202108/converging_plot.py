@@ -7,6 +7,7 @@ plt.rc('font', **font)
 plt.rcParams['mathtext.fontset'] = 'custom'
 plt.rcParams['mathtext.it'] = 'Arial:italic'
 plt.rcParams['mathtext.rm'] = 'Arial'
+plt.rcParams['pdf.fonttype'] = 42
 
 # font = {'size' : 16} # , 'weight' : 'bold'}
 # plt.rc('font', **font)
@@ -62,8 +63,11 @@ y_EGPHS.append((0.4823242 + 0.46832398)/2) # e225da0
 y_EGPHS.append((0.47294405 + 0.47484007)/2) # a451992
 y_EGPHS.append((0.47872645 + 0.47592255)/2) # b2e2dcb
 y_EGPHS.append((0.4766461 + 0.4800091)/2) # 96cbfec
+y_EGPHS.append((0.496164 + 0.46963057)/2) # f6f98f0
+y_EGPHS.append((0.48968768 + 0.485809)/2) # 734a74d
 
-y_S_G_P_E_H.append((0.4673425 + 0.49684522)/2) #
+y_S_G_P_E_H.append((0.4673425 + 0.49684522)/2) # 4f2a524
+y_S_G_P_E_H.append((0.46716988 + 0.5022696)/2) # 9e07ad6
 
 ax.plot(list(range(len(y_EGPHS_EPHS_EHS_EH_E))), y_EGPHS_EPHS_EHS_EH_E, label='EGPHS-EPHS-EHS-EH-E', marker='o')
 ax.plot(list(range(len(y_EGPHS_EGPH_EGP_EG_E))), y_EGPHS_EGPH_EGP_EG_E, label='EGPHS-EGPH-EGP-EG-E', marker='^')
@@ -82,8 +86,8 @@ ax.plot(list(range(len(y_S_G_P_E_H))), y_S_G_P_E_H, label='S-G-P-E-H', marker='D
 # xmin, xmax = ax.get_xlim()
 # ymin, ymax = ax.get_ylim()
 ax.set_xlabel('Iteration times')
-ax.set_ylabel('Final MAE/eV')
-plt.subplots_adjust(bottom=0.12, right=0.99, left=0.14, top=0.99)
+ax.set_ylabel('Final MAE, eV')
+plt.subplots_adjust(bottom=0.12, right=0.99, left=0.14, top=0.885)
 plt.grid()
-plt.legend(prop={'size': 11}, ncol=2)
+plt.legend(bbox_to_anchor=(-0.175, 0.99, 1, 0.2), loc="lower left", prop={'size': 11}, ncol=3)
 plt.show()
