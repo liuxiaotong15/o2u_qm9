@@ -31,7 +31,7 @@ tau_modify_enable = False
 if training_mode in [0, 1]:
     swap_E1_test = bool(training_mode&1)
     special_path = '1by1_init_randomly_S_G_P_E_H'  # best
-    last_commit_id = '1df3baf'
+    last_commit_id = '6362c43'
     if training_mode == 0:
         old_model_name = last_commit_id + '_0_123_' + special_path + '.hdf5'
         GPU_device = "0"
