@@ -163,10 +163,10 @@ s_exp_disordered = [Structure.from_dict(x['structure']) for x in d['disordered_e
 t_exp_disordered = [x['band_gap'] for x in d['disordered_exp'].values()]
 
 # give a default but only single-fidelity
-for i in len(s_exp):
+for i in range(len(s_exp)):
     s_exp[i].state=[0]
 
-for i in len(s_exp_disordered):
+for i in range(len(s_exp_disordered)):
     s_exp_disordered[i].state=[0]
 
 logging.info('exp data size is: {s}'.format(s=len(s_exp)))
