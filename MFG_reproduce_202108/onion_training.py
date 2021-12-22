@@ -9,7 +9,7 @@ import tensorflow as tf
 import os
 import gc
 
-from megnet.data.crystal import CrystalGraph
+from megnet.data.crystal import CrystalGraph, CrystalGraphDisordered
 from megnet.data.graph import GaussianDistance
 from megnet.models import MEGNetModel
 # from megnet.callbacks import XiaotongCB
