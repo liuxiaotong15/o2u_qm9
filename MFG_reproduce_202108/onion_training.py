@@ -20,7 +20,7 @@ seed = 123
 GPU_seed = 11111
 GPU_device = "0"
 dump_prediction_cif = False
-load_old_model_enable = True
+load_old_model_enable = False
 predict_before_dataclean = False
 training_new_model = True
 contain_e1_in_every_node = False
@@ -32,7 +32,7 @@ trained_last_time = True
 if training_mode in [0, 1]:
     swap_E1_test = bool(training_mode&1)
     # special_path = 'init_randomly_EGPHS_EGPH_EGP_EG_E'  # worst1
-    special_path = 'init_randomly_EGPHS_EPHS_EPH_EH_E'  # better
+    # special_path = 'init_randomly_EGPHS_EPHS_EPH_EH_E'  # better
     # special_path = 'init_randomly_EGPHS_EPHS_EHS_EH_E'  # best
     last_commit_id = '316a10e'
     if training_mode == 0:
@@ -85,16 +85,16 @@ logging.basicConfig(filename=dump_model_name+".log",
         format='%(asctime)s-%(pathname)s[line:%(lineno)d]-%(levelname)s: %(message)s',
         level=logging.INFO)
 
-def prediction(model):
+def prediction(model, structures, targets):
     MAE = 0
-    test_size = len(test_structures)
+    test_size = len(structures)
     for i in range(test_size):
-        model_output = model.predict_structure(test_structures[i]).ravel()
-        err = abs(model_output - test_targets[i])
+        model_output = model.predict_structure(structures[i]).ravel()
+        err = abs(model_output - targets[i])
         if dump_prediction_cif:
             name = '{ae}_{mo}_{target}.cif'.format(
-                    ae=err, mo=model_output, target=test_targets[i])
-            test_structures[i].to(filename=name)
+                    ae=err, mo=model_output, target=targets[i])
+            structures[i].to(filename=name)
         MAE += err
     MAE /= test_size
     return MAE
@@ -151,7 +151,6 @@ for it in items:
 
 test_structures = []
 test_targets = []
-test_input = []
 
 data_path = 'data/all_data.json' # put here the path to the json file
 with open(data_path,'r') as fp:
@@ -159,6 +158,16 @@ with open(data_path,'r') as fp:
 
 s_exp = [Structure.from_dict(x['structure']) for x in d['ordered_exp'].values()]
 t_exp = [x['band_gap'] for x in d['ordered_exp'].values()]
+
+s_exp_disordered = [Structure.from_dict(x['structure']) for x in d['disordered_exp'].values()]
+t_exp_disordered = [x['band_gap'] for x in d['disordered_exp'].values()]
+
+# give a default but only single-fidelity
+for i in len(s_exp):
+    s_exp[i].state=[0]
+
+for i in len(s_exp_disordered):
+    s_exp_disordered[i].state=[0]
 
 logging.info('exp data size is: {s}'.format(s=len(s_exp)))
 r = list(range(len(list(d['ordered_exp'].keys()))))
@@ -191,7 +200,7 @@ if load_old_model_enable:
     # load the past if needed
     model = MEGNetModel.from_file(old_model_name)
     if predict_before_dataclean:
-        prediction(model)
+        prediction(model, test_structures, test_targets)
     diff_lst = []
     for i in range(len(s_exp)):
         diff_lst.append(model.predict_structure(s_exp[i]).ravel() - t_exp[i])
@@ -221,20 +230,18 @@ mean is: {mean}'.format(std=np.std(diff_lst),
         pickle.dump(error_lst, f)
         f.close()
 
-# model = MEGNetModel(10, 2, nblocks=3, lr=1e-3,
-#         n1=4, n2=4, n3=4, npass=1, ntarget=1,
-#         graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
+# ordered structures only test
+# model = MEGNetModel(nfeat_edge=10, nfeat_global=2, graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 
-model = MEGNetModel(nfeat_edge=10, nfeat_global=2, graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
+# ordered/disordered structures test together
+model = MEGNetModel(nfeat_edge=100, nfeat_node=16, ngvocal=4, global_embedding_dim=16, graph_converter=CrystalGraphDisordered(bond_converter=GaussianDistance(np.linspace(0, 5, 100), 0.5)))
+
 model.save_model(dump_model_name+'_init_randomly' + '.hdf5')
 init_model_tag = 'EGPHS'
 start_model_tag = 'EGPHS'
 
 ep = 5000
 callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=True)
-
-for s in test_structures:
-    test_input.append(model.graph_converter.graph_to_input(model.graph_converter.convert(s)))
 
 db_short_full_dict = {'G': 'gllb-sc', 'H': 'hse', 'S': 'scan', 'P': 'pbe', 'E': 'E1'}
 
@@ -285,8 +292,10 @@ def find_sub_tree(cur_tag, history_tag):
         except TypeError:
             logging.info('MAE of {tag} is: {mae}'.format(tag=history_tag, mae='nan'))
         else:
-            mae = prediction(cur_model)
-            logging.info('MAE of {tag} is: {mae}'.format(tag=history_tag, mae=mae))
+            mae = prediction(model, test_structures, test_targets)
+            logging.info('Ordered structures MAE of {tag} is: {mae}'.format(tag=history_tag, mae=mae))
+            mae = prediction(model, s_exp_disordered, t_exp_disordered)
+            logging.info('Disordered structures MAE of {tag} is: {mae}'.format(tag=history_tag, mae=mae))
         cur_model.save_model(cur_model_name)
         del s, t, l
         gc.collect()
@@ -314,8 +323,10 @@ def find_sub_tree(cur_tag, history_tag):
         except TypeError:
             logging.info('MAE of {h}_E1 is: {mae}'.format(h=history_tag, mae='nan'))
         else:
-            mae = prediction(cur_model)
-            logging.info('MAE of {h}_E1 is: {mae}'.format(h=history_tag, mae=mae))
+            mae = prediction(model, test_structures, test_targets)
+            logging.info('Ordered structures MAE of {tag} is: {mae}'.format(tag=history_tag, mae=mae))
+            mae = prediction(model, s_exp_disordered, t_exp_disordered)
+            logging.info('Disordered structures MAE of {tag} is: {mae}'.format(tag=history_tag, mae=mae))
         cur_model.save_model(dump_model_name + '_' + history_tag + '_E1.hdf5')
     else:
         pass
