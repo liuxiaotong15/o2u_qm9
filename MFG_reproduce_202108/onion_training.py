@@ -139,7 +139,10 @@ for it in items:
     random.shuffle(r)
     sp_lst = []
     for i in r:
-        structures[it].append(Structure.from_str(df[it+'_structure'][i], fmt='cif'))
+        tmp = Structure.from_str(df[it+'_structure'][i], fmt='cif')
+        tmp.remove_oxidation_states()
+        tmp.state=[0]
+        structures[it].append(tmp)
         sp_lst.extend(list(set(structures[it][-1].species)))
         if tau_modify_enable:
             targets[it].append(df[it+'_gap'][i] * tau_dict[it])
@@ -164,9 +167,11 @@ t_exp_disordered = [x['band_gap'] for x in d['disordered_exp'].values()]
 
 # give a default but only single-fidelity
 for i in range(len(s_exp)):
+    s_exp[i].remove_oxidation_states()
     s_exp[i].state=[0]
 
 for i in range(len(s_exp_disordered)):
+    s_exp_disordered[i].remove_oxidation_states()
     s_exp_disordered[i].state=[0]
 
 logging.info('exp data size is: {s}'.format(s=len(s_exp)))
@@ -234,7 +239,7 @@ mean is: {mean}'.format(std=np.std(diff_lst),
 # model = MEGNetModel(nfeat_edge=10, nfeat_global=2, graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 
 # ordered/disordered structures test together
-model = MEGNetModel(nfeat_edge=100, nfeat_node=16, ngvocal=4, global_embedding_dim=16, graph_converter=CrystalGraphDisordered(bond_converter=GaussianDistance(np.linspace(0, 5, 100), 0.5)))
+model = MEGNetModel(nfeat_edge=100, nfeat_node=16, ngvocal=1, global_embedding_dim=16, graph_converter=CrystalGraphDisordered(bond_converter=GaussianDistance(np.linspace(0, 5, 100), 0.5)))
 
 model.save_model(dump_model_name+'_init_randomly' + '.hdf5')
 init_model_tag = 'EGPHS'
@@ -331,6 +336,13 @@ def find_sub_tree(cur_tag, history_tag):
     else:
         pass
         
+pbe_energy = prediction(model, structures['pbe'], targets['pbe'])
+ordered_energy = prediction(model, test_structures, test_targets)
+disordered_energy = prediction(model, s_exp_disordered, t_exp_disordered)
+
+logging.info('Prediction before trainnig, MAE of\\
+        pbe: {pbe}; ordered: {ordered}; disordered: {disordered}.'.format(
+    pbe=pbe_energy, ordered=ordered_energy, disordered=disordered_energy))
 
 find_sub_tree(init_model_tag, 'init_randomly')
 
