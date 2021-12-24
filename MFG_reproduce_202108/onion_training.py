@@ -297,9 +297,9 @@ def find_sub_tree(cur_tag, history_tag):
         except TypeError:
             logging.info('MAE of {tag} is: {mae}'.format(tag=history_tag, mae='nan'))
         else:
-            mae = prediction(model, test_structures, test_targets)
+            mae = prediction(cur_model, test_structures, test_targets)
             logging.info('Ordered structures MAE of {tag} is: {mae}'.format(tag=history_tag, mae=mae))
-            mae = prediction(model, s_exp_disordered, t_exp_disordered)
+            mae = prediction(cur_model, s_exp_disordered, t_exp_disordered)
             logging.info('Disordered structures MAE of {tag} is: {mae}'.format(tag=history_tag, mae=mae))
         cur_model.save_model(cur_model_name)
         del s, t, l
@@ -328,9 +328,9 @@ def find_sub_tree(cur_tag, history_tag):
         except TypeError:
             logging.info('MAE of {h}_E1 is: {mae}'.format(h=history_tag, mae='nan'))
         else:
-            mae = prediction(model, test_structures, test_targets)
+            mae = prediction(cur_model, test_structures, test_targets)
             logging.info('Ordered structures MAE of {tag} is: {mae}'.format(tag=history_tag, mae=mae))
-            mae = prediction(model, s_exp_disordered, t_exp_disordered)
+            mae = prediction(cur_model, s_exp_disordered, t_exp_disordered)
             logging.info('Disordered structures MAE of {tag} is: {mae}'.format(tag=history_tag, mae=mae))
         cur_model.save_model(dump_model_name + '_' + history_tag + '_E1.hdf5')
     else:
