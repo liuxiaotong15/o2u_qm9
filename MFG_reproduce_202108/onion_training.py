@@ -340,7 +340,7 @@ pbe_energy = prediction(model, structures['pbe'], targets['pbe'])
 ordered_energy = prediction(model, test_structures, test_targets)
 disordered_energy = prediction(model, s_exp_disordered, t_exp_disordered)
 
-logging.info('Prediction before trainnig, MAE of\\
+logging.info('Prediction before trainnig, MAE of \
         pbe: {pbe}; ordered: {ordered}; disordered: {disordered}.'.format(
     pbe=pbe_energy, ordered=ordered_energy, disordered=disordered_energy))
 
