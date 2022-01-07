@@ -1,6 +1,9 @@
 MFG_reproduce_202108/data/*
+MFG_reproduce_202108/*.txt
+MFG_reproduce_202108/*.tar
 *.json
 *.hdf5
+*.pdf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
