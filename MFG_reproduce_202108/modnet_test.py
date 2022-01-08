@@ -3,10 +3,12 @@ from matminer.datasets import load_dataset
 from modnet.models import MODNetModel
 from modnet.preprocessing import MODData
 import matplotlib.pyplot as plt 
+import tensorflow as tf
 from pymatgen.core import Composition
 
-
 from matminer.datasets import load_dataset
+
+callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=True)
 
 df = load_dataset("matbench_expt_gap")
 df["composition"] = df["composition"].map(Composition) # maps composition to a pymatgen composition object
@@ -20,6 +22,7 @@ data = MODData(
     target_names=["gap_expt_eV"]
 )
 
+print(type(df["composition"]), df["composition"])
 
 
 # Featurization of the moddata
@@ -50,8 +53,9 @@ model.fit(train,
           lr = 0.0002,
           batch_size = 64,
           loss = 'mae',
-          epochs = 100,
+          epochs = 1000,
           verbose = 1,
+          callbacks=[callback]
          )
 
 

@@ -9,31 +9,27 @@ import tensorflow as tf
 import os
 import gc
 
-from megnet.data.crystal import CrystalGraph
-from megnet.data.graph import GaussianDistance
-from megnet.models import MEGNetModel
-# from megnet.callbacks import XiaotongCB
-
 import sys
+
+from modnet.models import MODNetModel
+from modnet.preprocessing import MODData
+
 training_mode = int(sys.argv[1])
 seed = 123
 GPU_seed = 11111
 GPU_device = "0"
 dump_prediction_cif = False
-load_old_model_enable = True
-predict_before_dataclean = False
+load_old_model_enable = False
 training_new_model = True
-contain_e1_in_every_node = False
 swap_E1_test = False
-tau_modify_enable = False
 
 trained_last_time = True
 
 if training_mode in [0, 1]:
     swap_E1_test = bool(training_mode&1)
-    special_path = 'init_randomly_EGPHS'  # only full
+    # special_path = 'init_randomly_EGPHS'  # only full
     # special_path = 'init_randomly_EGPHS_EGPH_EGP_EG_E'  # worst1
-    # special_path = 'init_randomly_EGPHS_EPHS_EHS_EH_E'  # best
+    special_path = 'init_randomly_EGPHS_EPHS_EHS_EH_E'  # best
     last_commit_id = 'f6f98f0'
     if training_mode == 0:
         old_model_name = last_commit_id + '_0_123_' + special_path + '.hdf5'
@@ -45,25 +41,7 @@ if training_mode in [0, 1]:
         pass
 
 
-tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H, S, G # min(MSE)
-# tau_dict = {'pbe': 1/0.6279685889089127,
-#             'hse': 1/0.7774483582697933,
-#             'scan': 1/0.7430766771711287,
-#             'gllb-sc': 1/1.0419268013851504} # P, H, S, G # min(MAE)
-
-# items = ['pbe', 'hse', 'gllb-sc', 'scan']
-# items = ['gllb-sc', 'hse', 'scan', 'pbe']
-# items = ['gllb-sc', 'scan', 'hse', 'pbe']
 items = ['gllb-sc', 'pbe', 'scan', 'hse']
-# items = ['pbe', 'scan', 'hse', 'gllb-sc']
-# items = ['pbe', 'hse']
-
-
-# old_model_name = '7075e10_9_4.hdf5'
-# old_model_name = '249acf2_9_123_4.hdf5'
-# old_model_name = 'c5ddc72_9_123_4.hdf5'
-# old_model_name = '1d8f4bd_9_123_4.hdf5'
-# old_model_name = 'fe32ec4_12_1234_2.hdf5'
 cut_value = 0.3
 
 random.seed(seed)
@@ -87,17 +65,14 @@ logging.basicConfig(filename=dump_model_name+".log",
 
 def prediction(model):
     MAE = 0
-    test_size = len(test_structures)
-    for i in range(test_size):
-        model_output = model.predict_structure(test_structures[i]).ravel()
-        err = abs(model_output - test_targets[i])
-        if dump_prediction_cif:
-            name = '{ae}_{mo}_{target}.cif'.format(
-                    ae=err, mo=model_output, target=test_targets[i])
-            test_structures[i].to(filename=name)
-        MAE += err
-    MAE /= test_size
-    return MAE
+    test_data = MODData(materials=test_structures, targets=test_targets, target_names=['gap_eV'])
+    test_data.featurize()
+    test_data.feature_selection(n=-1)
+    
+    pred = model.predict(test_data)
+
+    mae_test = np.absolute(pred.values-test_data.df_targets.values).mean()
+    return mae_test
     # logging.info('MAE is: {mae}'.format(mae=MAE))
 
 
@@ -111,17 +86,11 @@ logging.info('device number is: GPU_{d}'.format(d=GPU_device))
 logging.info('GPU seed is: {d}'.format(d=GPU_seed))
 
 logging.info('items is {it}'.format(it=str(items)))
-logging.info('contain E1 in every node is {e}'.format(e=str(contain_e1_in_every_node)))
 logging.info('trained_last_time is {e}'.format(e=str(trained_last_time)))
-
-logging.info('tau_enable={t} and tau_dict is {td}'.format(
-    t=str(tau_modify_enable), td=str(tau_dict)))
 
 logging.info('load_old_model_enable={l}, old_model_name={omn}, cut_value={cv}'.format(
     l=load_old_model_enable, omn=old_model_name, cv=cut_value))
 logging.info('swap_E1_test={b}'.format(b=str(swap_E1_test)))
-logging.info('predict_before_dataclean={p}, training_new_model={t}'.format(
-    p=predict_before_dataclean, t=training_new_model))
 
 
 ## start to load data ##
@@ -141,17 +110,13 @@ for it in items:
     for i in r:
         structures[it].append(Structure.from_str(df[it+'_structure'][i], fmt='cif'))
         sp_lst.extend(list(set(structures[it][-1].species)))
-        if tau_modify_enable:
-            targets[it].append(df[it+'_gap'][i] * tau_dict[it])
-        else:
-            targets[it].append(df[it+'_gap'][i])
+        targets[it].append(df[it+'_gap'][i])
     logging.info('dataset {item}, element dict: {d}'.format(item=it, d=Counter(sp_lst)))
 
 ### load exp data and shuffle
 
 test_structures = []
 test_targets = []
-test_input = []
 
 data_path = 'data/all_data.json' # put here the path to the json file
 with open(data_path,'r') as fp:
@@ -190,8 +155,6 @@ if load_old_model_enable:
     import pickle
     # load the past if needed
     model = MEGNetModel.from_file(old_model_name)
-    if predict_before_dataclean:
-        prediction(model)
     diff_lst = []
     for i in range(len(s_exp)):
         diff_lst.append(model.predict_structure(s_exp[i]).ravel() - t_exp[i])
@@ -221,20 +184,20 @@ mean is: {mean}'.format(std=np.std(diff_lst),
         pickle.dump(error_lst, f)
         f.close()
 
-# model = MEGNetModel(10, 2, nblocks=3, lr=1e-3,
-#         n1=4, n2=4, n3=4, npass=1, ntarget=1,
-#         graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
+model = MODNetModel([[['gap_eV']]],
+                    weights={'gap_eV':1},
+                    num_neurons = [[256], [128], [16], [16]],
+                    n_feat = 150,
+                    act =  "elu"
+                   )
 
-model = MEGNetModel(nfeat_edge=10, nfeat_global=2, graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
-model.save_model(dump_model_name+'_init_randomly' + '.hdf5')
+
+model.save(dump_model_name+'_init_randomly' + '.hdf5')
 init_model_tag = 'EGPHS'
 start_model_tag = 'EGPHS'
 
 ep = 5000
 callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=True)
-
-for s in test_structures:
-    test_input.append(model.graph_converter.graph_to_input(model.graph_converter.convert(s)))
 
 db_short_full_dict = {'G': 'gllb-sc', 'H': 'hse', 'S': 'scan', 'P': 'pbe', 'E': 'E1'}
 
@@ -244,9 +207,6 @@ def construct_dataset_from_str(db_short_str):
     for i in range(len(db_short_str)):
         s.extend(structures[db_short_full_dict[db_short_str[i]]])
         t.extend(targets[db_short_full_dict[db_short_str[i]]])
-    if contain_e1_in_every_node:
-        s.extend(structures['E1'])
-        t.extend(targets['E1'])
     c = list(zip(s, t))
     random.shuffle(c)
     s, t = zip(*c)
@@ -265,29 +225,25 @@ def find_sub_tree(cur_tag, history_tag):
         else:
             pass
 
-        if contain_e1_in_every_node:
-            history_tag += 'E1'
         cur_model_name = dump_model_name + '_' + history_tag + '.hdf5'
-        cur_model = MEGNetModel.from_file(father_model_name)
+        cur_model = MODNetModel.load(father_model_name)
         ###### get dataset ######
         s, t = construct_dataset_from_str(cur_tag)
-        l = len(s)
+        data = MODData(materials=s, targets=t, target_names=['gap_eV'])
+        data.featurize()
+        data.feature_selection(n=-1)
         ###### train ############
-        try:
-            cur_model.train(s[:int(0.8*l)], t[:int(0.8*l)],
-                        validation_structures=s[int(0.8*l):],
-                        validation_targets=t[int(0.8*l):],
-                        callbacks=[callback],
-                        save_checkpoint=False,
-                        automatic_correction=False,
-                        batch_size = 256,
-                        epochs=ep)
-        except TypeError:
-            logging.info('MAE of {tag} is: {mae}'.format(tag=history_tag, mae='nan'))
-        else:
-            mae = prediction(cur_model)
-            logging.info('MAE of {tag} is: {mae}'.format(tag=history_tag, mae=mae))
-        cur_model.save_model(cur_model_name)
+        cur_model.fit(data,
+                val_fraction = 0.2,
+                lr = 0.0002,
+                batch_size = 256,
+                verbose = 1,
+                loss = 'mae',
+                epochs = ep,
+                callbacks=[callback])
+        mae = prediction(cur_model)
+        logging.info('MAE of {tag} is: {mae}'.format(tag=history_tag, mae=mae))
+        cur_model.save(cur_model_name)
         del s, t, l
         gc.collect()
     else:
@@ -298,25 +254,6 @@ def find_sub_tree(cur_tag, history_tag):
         for i in range(len(cur_tag)):
             next_tag = cur_tag[:i] + cur_tag[i+1:]
             find_sub_tree(next_tag, history_tag)
-    elif contain_e1_in_every_node and trained_last_time == False:
-    ####### extra E1 training ##
-        s, t = construct_dataset_from_str('')
-        l = len(s)
-        try:
-            cur_model.train(s[:int(0.8*l)], t[:int(0.8*l)],
-                    validation_structures=s[int(0.8*l):],
-                    validation_targets=t[int(0.8*l):],
-                    callbacks=[callback],
-                    save_checkpoint=False,
-                    automatic_correction=False,
-                    batch_size = 256,
-                    epochs=ep)
-        except TypeError:
-            logging.info('MAE of {h}_E1 is: {mae}'.format(h=history_tag, mae='nan'))
-        else:
-            mae = prediction(cur_model)
-            logging.info('MAE of {h}_E1 is: {mae}'.format(h=history_tag, mae=mae))
-        cur_model.save_model(dump_model_name + '_' + history_tag + '_E1.hdf5')
     else:
         pass
         
