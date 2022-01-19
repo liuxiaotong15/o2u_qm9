@@ -317,12 +317,21 @@ plt.subplots_adjust(bottom=0.125, right=0.978, left=0.105, top=0.973)
 
 # mae = prediction(cur_model, s_exp_disordered, t_exp_disordered)
 # logging.info('Disordered structures MAE of {tag} is: {mae}'.format(tag=old_model_name, mae=mae))
+
+zzz = np.array(xxx) - np.array(yyy)
+
+# dump in csv format
+import pandas as pd
+dict = {'exp_target': xxx, 'model_output': yyy, 'Abs. Err.': list(np.abs(zzz))}
+df = pd.DataFrame(dict)
+df.to_csv(old_model_name_0+'.csv')
+
 import seaborn as sns
 import numpy as np
 
 plt.figure(1)
 fig1, ax1 = plt.subplots()
-zzz = np.array(xxx) - np.array(yyy)
+
 sns.distplot(zzz, ax=ax1, hist=True, kde=True)
 
 ax1.set_xlim((-3, 3))
