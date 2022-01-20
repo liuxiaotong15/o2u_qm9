@@ -9,7 +9,7 @@ import tensorflow as tf
 import os
 import gc
 
-from megnet.data.crystal import CrystalGraph, CrystalGraphDisordered
+from megnet.data.crystal import CrystalGraph #, CrystalGraphDisordered
 from megnet.data.graph import GaussianDistance
 from megnet.models import MEGNetModel
 # from megnet.callbacks import XiaotongCB
@@ -33,8 +33,17 @@ if training_mode in [0, 1]:
     swap_E1_test = bool(training_mode&1)
     # special_path = 'init_randomly_EGPHS_EGPH_EGP_EG_E'  # worst1
     # special_path = 'init_randomly_EGPHS_EPHS_EPH_EH_E'  # better
-    special_path = 'init_randomly_EGPHS_EPHS_EHS_EH_E'  # best
-    last_commit_id = '223d078'
+    # special_path = 'init_randomly_EGPHS_EPHS_EHS_EH_E'  # best
+    # special_path = 'init_randomly_EGPHS_GPHS_GPH_GP_G'  # worst
+    special_path = 'init_randomly_EGPHS_EGPS_GPS_GS_S'  # worst
+    # special_path = '1by1_init_randomly_S'
+    # special_path = '1by1_init_randomly_S_G_P_E_H'
+    # special_path = '1by1_init_randomly_P_S_G_H_E'
+    # special_path = '1by1_init_randomly_H_P_S_E_G'
+    # last_commit_id = '02923e5' # onion
+    last_commit_id = '30f5b2b' # cleaned onion
+    # last_commit_id = 'a367e11'  # 1by1 
+    # last_commit_id = '3efa225'  # 1by1 cleaned
     if training_mode == 0:
         old_model_name_0 = last_commit_id + '_0_123_' + special_path + '.hdf5'
         old_model_name_1 = last_commit_id + '_1_123_' + special_path + '.hdf5'
@@ -157,8 +166,8 @@ for it in items:
     sp_lst = []
     for i in r:
         tmp = Structure.from_str(df[it+'_structure'][i], fmt='cif')
-        tmp.remove_oxidation_states()
-        tmp.state=[0]
+        # tmp.remove_oxidation_states()
+        # tmp.state=[0]
         structures[it].append(tmp)
         sp_lst.extend(list(set(structures[it][-1].species)))
         if tau_modify_enable:
@@ -176,7 +185,10 @@ data_path = 'data/all_data.json' # put here the path to the json file
 with open(data_path,'r') as fp:
     d = json.load(fp)
 
+# "icsd_id": 261333, "is_ordered": true, "band_gap": 5.54
+
 s_exp = [Structure.from_dict(x['structure']) for x in d['ordered_exp'].values()]
+s_icsd = [x['icsd_id'] for x in d['ordered_exp'].values()]
 t_exp = [x['band_gap'] for x in d['ordered_exp'].values()]
 
 s_exp_disordered = [Structure.from_dict(x['structure']) for x in d['disordered_exp'].values()]
@@ -185,13 +197,13 @@ t_exp_disordered = [x['band_gap'] for x in d['disordered_exp'].values()]
 print(len(s_exp_disordered), len(s_exp))
 
 # give a default but only single-fidelity
-for i in range(len(s_exp)):
-    s_exp[i].remove_oxidation_states()
-    s_exp[i].state=[0]
+# for i in range(len(s_exp)):
+#     s_exp[i].remove_oxidation_states()
+#     s_exp[i].state=[0]
 
-for i in range(len(s_exp_disordered)):
-    s_exp_disordered[i].remove_oxidation_states()
-    s_exp_disordered[i].state=[0]
+# for i in range(len(s_exp_disordered)):
+#     s_exp_disordered[i].remove_oxidation_states()
+#     s_exp_disordered[i].state=[0]
 
 logging.info('exp data size is: {s}'.format(s=len(s_exp)))
 r = list(range(len(list(d['ordered_exp'].keys()))))
@@ -200,20 +212,27 @@ sp_lst=[]
 structures['E1'] = []
 targets['E1'] = []
 
+icsd_1 = []
+icsd_2 = []
+
 zero_cnt_1 = 0
 zero_cnt_2 = 0
 for i in r:
     sp_lst.extend(list(set(s_exp[i].species)))
     if random.random() > 0.5:
         structures['E1'].append(s_exp[i])
+        icsd_1.append(s_icsd[i])
         targets['E1'].append(t_exp[i])
         if t_exp[i] == 0:
             zero_cnt_1 += 1
     else:
         test_structures.append(s_exp[i])
+        icsd_2.append(s_icsd[i])
         test_targets.append(t_exp[i])
         if t_exp[i] == 0:
             zero_cnt_2 += 1
+
+all_icsd = icsd_2 + icsd_1
 
 print("Zero counts in E1 and E2:", zero_cnt_1, zero_cnt_2)
 
@@ -231,9 +250,9 @@ for k in structures.keys():
 # model = MEGNetModel(nfeat_edge=10, nfeat_global=2, graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
 
 # ordered/disordered structures test together
-model = MEGNetModel(nfeat_edge=100, nfeat_node=16, ngvocal=1, global_embedding_dim=16, graph_converter=CrystalGraphDisordered(bond_converter=GaussianDistance(np.linspace(0, 5, 100), 0.5)))
+# model = MEGNetModel(nfeat_edge=100, nfeat_node=16, ngvocal=1, global_embedding_dim=16, graph_converter=CrystalGraphDisordered(bond_converter=GaussianDistance(np.linspace(0, 5, 100), 0.5)))
 
-model.save_model(dump_model_name+'_init_randomly' + '.hdf5')
+# model.save_model(dump_model_name+'_init_randomly' + '.hdf5')
 init_model_tag = 'EGPHS'
 start_model_tag = 'EGPHS'
 
@@ -322,9 +341,9 @@ zzz = np.array(xxx) - np.array(yyy)
 
 # dump in csv format
 import pandas as pd
-dict = {'exp_target': xxx, 'model_output': yyy, 'Abs. Err.': list(np.abs(zzz))}
+dict = {'icsd': all_icsd, 'exp_target': xxx, 'model_output': yyy, 'Abs. Err.': list(np.abs(zzz))}
 df = pd.DataFrame(dict)
-df.to_csv(old_model_name_0+'.csv')
+df.to_csv(old_model_name_0 + '_MAE_' + str(np.mean(all_err_lst)) +'.csv')
 
 import seaborn as sns
 import numpy as np
@@ -347,4 +366,4 @@ ax1.set_xlabel('Error on band gap (eV)')
 plt.annotate(r"$\mathrm{\mu: }$" + str(round(np.mean(zzz), 3)) + "\n" + r"$\mathrm{\sigma: }$" + str(round(np.std(zzz), 3)), xy=(0.05, 0.85), xycoords='axes fraction')
 # fig1.legend(labels=[r"$\mathrm{\mu: " + str(round(np.mean(zzz), 3)) + r'\\' + r" \sigma: " + str(round(np.std(zzz), 3)) + r"}$"])
 plt.subplots_adjust(bottom=0.13, right=0.978, left=0.052, top=0.985)
-plt.show()
+# plt.show()
