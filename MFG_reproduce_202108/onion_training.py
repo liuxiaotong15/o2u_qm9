@@ -25,7 +25,7 @@ predict_before_dataclean = False
 training_new_model = True
 contain_e1_in_every_node = False
 swap_E1_test = False
-tau_modify_enable = False
+tau_modify_enable = True
 
 trained_last_time = True
 
@@ -45,7 +45,9 @@ if training_mode in [0, 1]:
         pass
 
 
-tau_dict = {'pbe': 1.297, 'hse': 1.066, 'scan': 1.257, 'gllb-sc': 0.744} # P, H, S, G # min(MSE)
+tau_dict = {'pbe': 1.34, 'hse': 1.01, 'scan': 1.01, 'gllb-sc': 0.79} # P, H, S, G # min(MSE)
+tau_dict_b = {'pbe': 0.0, 'hse': 0.0, 'scan': 0.52, 'gllb-sc': 0.1} # P, H, S, G # min(MSE)
+
 # tau_dict = {'pbe': 1/0.6279685889089127,
 #             'hse': 1/0.7774483582697933,
 #             'scan': 1/0.7430766771711287,
@@ -145,7 +147,7 @@ for it in items:
         structures[it].append(tmp)
         sp_lst.extend(list(set(structures[it][-1].species)))
         if tau_modify_enable:
-            targets[it].append(df[it+'_gap'][i] * tau_dict[it])
+            targets[it].append(df[it+'_gap'][i] * tau_dict[it] + tau_dict_b[it])
         else:
             targets[it].append(df[it+'_gap'][i])
     logging.info('dataset {item}, element dict: {d}'.format(item=it, d=Counter(sp_lst)))
