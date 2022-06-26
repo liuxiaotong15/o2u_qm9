@@ -13,6 +13,10 @@ def plot_output_exp_err(model0, model1, structures, E_targets, dft_targets, ax):
     test_size = len(structures)
     output_lst = []
     
+    err_lst_0 = []
+    err_lst_smaller_2 = []
+    err_lst_beq_2 = []
+
     err_lst = []
     err_cutoff_lst = []
     for i in range(test_size):
@@ -22,7 +26,17 @@ def plot_output_exp_err(model0, model1, structures, E_targets, dft_targets, ax):
         output_lst.append(model_output[0])
         xxx.append(E_targets[i])
         yyy.append(model_output[0])
-        err_lst.append(model_output[0] - E_targets[i])
+        err = model_output[0] - E_targets[i]
+        err_lst.append(err)
+
+        err = abs(err)
+        if E_targets[i] < 0.001:
+            err_lst_0.append(err)
+        elif E_targets[i] < 2:
+            err_lst_smaller_2.append(err)
+        else:
+            err_lst_beq_2.append(err)
+
         if len(dft_targets) > 0:
             if abs(model_output[0] - dft_targets[i]) > 0.3:
                 err_cutoff_lst.append(model_output[0] - E_targets[i])
@@ -35,6 +49,9 @@ def plot_output_exp_err(model0, model1, structures, E_targets, dft_targets, ax):
     err_lst = np.array(err_lst)
     err_cutoff_lst = np.array(err_cutoff_lst)
     print('MAE, mean and std of model output:', MAE, np.mean(err_lst), np.std(err_lst))
+    print('MAE_0: {0}, sum: {1},cnt: {2}'.format(np.sum(err_lst_0)/len(err_lst_0), np.sum(err_lst_0), len(err_lst_0)))
+    print('MAE<2: {0}, sum: {1},cnt: {2}'.format(np.sum(err_lst_smaller_2)/len(err_lst_smaller_2), np.sum(err_lst_smaller_2), len(err_lst_smaller_2)))
+    print('MAE>=2: {0}, sum: {1},cnt: {2}'.format(np.sum(err_lst_0)/len(err_lst_beq_2), np.sum(err_lst_beq_2), len(err_lst_beq_2)))
     if len(dft_targets) > 0:
         print('MAE, mean and std of >0.3 correct:', np.mean(np.abs(err_cutoff_lst)), np.mean(err_cutoff_lst), np.std(err_cutoff_lst))
 
@@ -108,6 +125,6 @@ for idx, df in enumerate([df_exp_no_dft, df_pbe_expt, df_hse_expt, df_scan_expt,
         DFT_targets = []
     plot_output_exp_err(cur_model_0, cur_model_1, test_structures, E_targets, DFT_targets, ax)
     plt.subplots_adjust(bottom=0.125, right=0.978, left=0.105, top=0.973)
-    # plt.show()
-    plt.savefig(str(idx) + '.pdf')
+    plt.show()
+    # plt.savefig(str(idx) + '.pdf')
 
