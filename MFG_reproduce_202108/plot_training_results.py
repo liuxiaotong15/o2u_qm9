@@ -33,17 +33,18 @@ if training_mode in [0, 1]:
     swap_E1_test = bool(training_mode&1)
     # special_path = 'init_randomly_EGPHS_EGPH_EGP_EG_E'  # worst1
     # special_path = 'init_randomly_EGPHS_EPHS_EPH_EH_E'  # better
-    # special_path = 'init_randomly_EGPHS_EPHS_EHS_EH_E'  # best
+    special_path = 'init_randomly_EGPHS_EPHS_EHS_EH_E'  # best
     # special_path = 'init_randomly_EGPHS_GPHS_GPH_GP_G'  # worst
-    special_path = 'init_randomly_EGPHS_EGPS_GPS_GS_S'  # worst
+    # special_path = 'init_randomly_EGPHS_EGPS_GPS_GS_S'  # worst
     # special_path = '1by1_init_randomly_S'
     # special_path = '1by1_init_randomly_S_G_P_E_H'
     # special_path = '1by1_init_randomly_P_S_G_H_E'
     # special_path = '1by1_init_randomly_H_P_S_E_G'
     # last_commit_id = '02923e5' # onion
-    last_commit_id = '30f5b2b' # cleaned onion
+    # last_commit_id = '30f5b2b' # cleaned onion
     # last_commit_id = 'a367e11'  # 1by1 
     # last_commit_id = '3efa225'  # 1by1 cleaned
+    last_commit_id = '223d078'
     if training_mode == 0:
         old_model_name_0 = last_commit_id + '_0_123_' + special_path + '.hdf5'
         old_model_name_1 = last_commit_id + '_1_123_' + special_path + '.hdf5'
@@ -197,13 +198,13 @@ t_exp_disordered = [x['band_gap'] for x in d['disordered_exp'].values()]
 print(len(s_exp_disordered), len(s_exp))
 
 # give a default but only single-fidelity
-# for i in range(len(s_exp)):
-#     s_exp[i].remove_oxidation_states()
-#     s_exp[i].state=[0]
+for i in range(len(s_exp)):
+    s_exp[i].remove_oxidation_states()
+    s_exp[i].state=[0]
 
-# for i in range(len(s_exp_disordered)):
-#     s_exp_disordered[i].remove_oxidation_states()
-#     s_exp_disordered[i].state=[0]
+for i in range(len(s_exp_disordered)):
+    s_exp_disordered[i].remove_oxidation_states()
+    s_exp_disordered[i].state=[0]
 
 logging.info('exp data size is: {s}'.format(s=len(s_exp)))
 r = list(range(len(list(d['ordered_exp'].keys()))))
@@ -366,4 +367,4 @@ ax1.set_xlabel('Error on band gap (eV)')
 plt.annotate(r"$\mathrm{\mu: }$" + str(round(np.mean(zzz), 3)) + "\n" + r"$\mathrm{\sigma: }$" + str(round(np.std(zzz), 3)), xy=(0.05, 0.85), xycoords='axes fraction')
 # fig1.legend(labels=[r"$\mathrm{\mu: " + str(round(np.mean(zzz), 3)) + r'\\' + r" \sigma: " + str(round(np.std(zzz), 3)) + r"}$"])
 plt.subplots_adjust(bottom=0.13, right=0.978, left=0.052, top=0.985)
-# plt.show()
+plt.show()
