@@ -112,6 +112,9 @@ def plot_output_exp_err(model, structures, targets, ax):
     ax.set_ylim([0, 12])
     ax.plot([0, 1], [0, 1], 'k--', transform=ax.transAxes)
 
+    a, b, r_value, p_value, std_err = stats.linregress(targets, output_lst)
+    print("k, b: ", a, b)
+
         
 
 def prediction(model, structures, targets):
@@ -306,21 +309,23 @@ plot_output_exp_err(cur_model_1, structures['E1'], targets['E1'], ax)
 
 # analyze MAE of all, metal, and non-metal
 
-metal_err_lst, non_metal_err_lst, all_err_lst = [], [], []
+metal_err_lst, smaller2_err_lst, bigger2_err_lst, all_err_lst = [], [], [], []
 
 for xx, yy in zip(xxx, yyy):
-    if xx == 0:
+    if xx < 0.0001:
         metal_err_lst.append(abs(xx-yy))
+    elif xx < 2:
+        smaller2_err_lst.append(abs(xx-yy))
     else:
-        non_metal_err_lst.append(abs(xx-yy))
+        bigger2_err_lst.append(abs(xx-yy))
     
     all_err_lst.append(abs(xx-yy))
 
 
-metal_err_lst, non_metal_err_lst, all_err_lst = np.array(metal_err_lst), np.array(non_metal_err_lst), np.array(all_err_lst)
+metal_err_lst, smaller2_err_lst, bigger2_err_lst, all_err_lst = np.array(metal_err_lst), np.array(smaller2_err_lst), np.array(bigger2_err_lst), np.array(all_err_lst)
 
-print('MAE of metal, non_metal and all', np.mean(metal_err_lst), np.mean(non_metal_err_lst), np.mean(all_err_lst))
-print('std of metal, non_metal and all', np.std(metal_err_lst), np.std(non_metal_err_lst), np.std(all_err_lst))
+print('MAE of metal, <2, >=2 and all', np.mean(metal_err_lst), np.mean(smaller2_err_lst), np.mean(bigger2_err_lst), np.mean(all_err_lst))
+print('std of metal, <2, >=2 and all', np.std(metal_err_lst), np.std(smaller2_err_lst), np.std(bigger2_err_lst), np.std(all_err_lst))
 
 
 # plot
