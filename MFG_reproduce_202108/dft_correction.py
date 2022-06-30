@@ -96,44 +96,6 @@ logging.basicConfig(filename=dump_model_name+".log",
         format='%(asctime)s-%(pathname)s[line:%(lineno)d]-%(levelname)s: %(message)s',
         level=logging.INFO)
 
-xxx, yyy = [], [] 
-
-def plot_output_exp_err(model, structures, targets, ax, k, b):
-    test_size = len(structures)
-    output_lst = []
-    for i in range(test_size):
-        model_output = model.predict_structure(structures[i]).ravel()
-        model_output = (model_output-b)/k
-        output_lst.append(model_output[0])
-        xxx.append(targets[i])
-        yyy.append(model_output[0])
-    
-    ax.scatter(targets, output_lst, alpha=0.5)
-    ax.set_xlim([0, 12])
-    ax.set_ylim([0, 12])
-    ax.plot([0, 1], [0, 1], 'k--', transform=ax.transAxes)
-
-    a, b, r_value, p_value, std_err = stats.linregress(targets, output_lst)
-    print("k, b: ", a, b)
-
-        
-
-def prediction(model, structures, targets):
-    MAE = 0
-    test_size = len(structures)
-    for i in range(test_size):
-        model_output = model.predict_structure(structures[i]).ravel()
-        err = abs(model_output - targets[i])
-        if dump_prediction_cif:
-            name = '{ae}_{mo}_{target}.cif'.format(
-                    ae=err, mo=model_output, target=targets[i])
-            structures[i].to(filename=name)
-        MAE += err
-    MAE /= test_size
-    return MAE
-    # logging.info('MAE is: {mae}'.format(mae=MAE))
-
-
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = GPU_device
 
@@ -189,14 +151,15 @@ df = pd.read_csv(mapping_file_name)
 for i in range(len(df)):
     icsd_mpid_mapping[df["icsd_id"][i]] = df['mp_id'][i]
 
-df_he = pd.read_csv("data/intersection/HE.csv")
-df_pe = pd.read_csv("data/intersection/PE.csv")
-df_se = pd.read_csv("data/intersection/SE.csv")
-df_ge = pd.read_csv("data/intersection/GE.csv")
+df_he = pd.read_csv("data/5set/H.csv")
+df_pe = pd.read_csv("data/5set/P.csv")
+df_se = pd.read_csv("data/5set/S.csv")
+df_ge = pd.read_csv("data/5set/G.csv")
 ### load exp data and shuffle
 
 test_structures = []
 test_targets = []
+test_dft = []
 
 data_path = 'data/all_data.json' # put here the path to the json file
 with open(data_path,'r') as fp:
@@ -228,116 +191,101 @@ random.shuffle(r)
 sp_lst=[]
 structures['E1'] = []
 targets['E1'] = []
+target_dft = []
 
 icsd_1 = []
 icsd_2 = []
 
 zero_cnt_1 = 0
 zero_cnt_2 = 0
+
+
+
+############################# change this for diff dft dataset ##########
+# df_dft = df_ge
+# df_dft = df_se
+# df_dft = df_he
+df_dft = df_pe
+#########################################################################
+
 for i in r:
     sp_lst.extend(list(set(s_exp[i].species)))
+    mpid = icsd_mpid_mapping["icsd-{0}".format(s_icsd[i])]
     if random.random() > 0.5:
-        if icsd_mpid_mapping["icsd-{0}".format(s_icsd[i])] not in list(df_ge["mp_id"]):
+        if mpid not in list(df_dft["mp_id"]):
             continue
         structures['E1'].append(s_exp[i])
         icsd_1.append(s_icsd[i])
         targets['E1'].append(t_exp[i])
+        idx = df_dft[df_dft.mp_id==mpid].index
+        target_dft.append(df_dft["gap"][idx].values[0])
         if t_exp[i] == 0:
             zero_cnt_1 += 1
     else:
-        if icsd_mpid_mapping["icsd-{0}".format(s_icsd[i])] not in list(df_ge["mp_id"]):
+        if mpid not in list(df_dft["mp_id"]):
             continue
         test_structures.append(s_exp[i])
         icsd_2.append(s_icsd[i])
         test_targets.append(t_exp[i])
+        idx = df_dft[df_dft.mp_id==mpid].index
+        test_dft.append(df_dft["gap"][idx].values[0])
+
         if t_exp[i] == 0:
             zero_cnt_2 += 1
 
-all_icsd = icsd_2 + icsd_1
-
-print("Zero counts in E1 and E2:", zero_cnt_1, zero_cnt_2)
-
-if swap_E1_test:
-    structures['E1'], test_structures = test_structures, structures['E1']
-    targets['E1'], test_targets = test_targets, targets['E1']
-
-logging.info('dataset EXP, element dict: {d}'.format(item=it, d=Counter(sp_lst)))
-
-logging.info(str(structures.keys()) + str(targets.keys()))
-for k in structures.keys():
-    logging.info(str(len(structures[k])) + str(len(targets[k])))
-
-# ordered structures only test
-# model = MEGNetModel(nfeat_edge=10, nfeat_global=2, graph_converter=CrystalGraph(bond_converter=GaussianDistance(np.linspace(0, 5, 10), 0.5)))
-
-# ordered/disordered structures test together
-# model = MEGNetModel(nfeat_edge=100, nfeat_node=16, ngvocal=1, global_embedding_dim=16, graph_converter=CrystalGraphDisordered(bond_converter=GaussianDistance(np.linspace(0, 5, 100), 0.5)))
-
-# model.save_model(dump_model_name+'_init_randomly' + '.hdf5')
-init_model_tag = 'EGPHS'
-start_model_tag = 'EGPHS'
-
-ep = 5000
-callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=True)
-
-db_short_full_dict = {'G': 'gllb-sc', 'H': 'hse', 'S': 'scan', 'P': 'pbe', 'E': 'E1'}
-
-def construct_dataset_from_str(db_short_str):
-    s = []
-    t = []
-    for i in range(len(db_short_str)):
-        s.extend(structures[db_short_full_dict[db_short_str[i]]])
-        t.extend(targets[db_short_full_dict[db_short_str[i]]])
-    if contain_e1_in_every_node:
-        s.extend(structures['E1'])
-        t.extend(targets['E1'])
-    c = list(zip(s, t))
-    random.shuffle(c)
-    s, t = zip(*c)
-    return s, t
-
-       
-# pbe_energy = prediction(model, structures['pbe'], targets['pbe'])
-# ordered_energy = prediction(model, test_structures, test_targets)
-# disordered_energy = prediction(model, s_exp_disordered, t_exp_disordered)
-# 
-# logging.info('Prediction before trainnig, MAE of \
-#         pbe: {pbe}; ordered: {ordered}; disordered: {disordered}.'.format(
-#     pbe=pbe_energy, ordered=ordered_energy, disordered=disordered_energy))
-
-# find_sub_tree(init_model_tag, 'init_randomly')
-
-
-cur_model_0 = MEGNetModel.from_file(old_model_name_0)
-cur_model_1 = MEGNetModel.from_file(old_model_name_1)
-
-import matplotlib.pyplot as plt
-plt.figure(0)
-from scipy import stats
-font = {'size': 16, 'family': 'Arial'}
-plt.rc('font', **font)
-plt.rcParams['mathtext.rm'] = 'Arial'
-plt.rcParams['pdf.fonttype'] = 42
-
-fig, ax = plt.subplots()
-
-plot_output_exp_err(cur_model_0, test_structures, test_targets, ax, 1, 0)
-plot_output_exp_err(cur_model_1, structures['E1'], targets['E1'], ax, 1, 0)
+print(targets['E1'])
+print(target_dft)
 
 # analyze MAE of all, metal, and non-metal
-
 metal_err_lst, smaller2_err_lst, bigger2_err_lst, all_err_lst = [], [], [], []
 
-for xx, yy in zip(xxx, yyy):
-    if xx < 0.0001:
-        metal_err_lst.append(abs(xx-yy))
-    elif xx < 2:
-        smaller2_err_lst.append(abs(xx-yy))
-    else:
-        bigger2_err_lst.append(abs(xx-yy))
-    
-    all_err_lst.append(abs(xx-yy))
+from scipy import stats
+from sklearn.linear_model import SGDRegressor
 
+model = SGDRegressor(loss="epsilon_insensitive", epsilon=0)
+x = np.array(targets['E1'])
+y = np.array(target_dft)
+test_x = np.array(test_targets)
+test_y = np.array(test_dft)
+
+model.fit(x.reshape([-1,1]),y)
+k1 = model.coef_[0]
+b1 = model.intercept_[0]
+
+# k1, b1, r_value, p_value, std_err = stats.linregress(targets['E1'], target_dft)
+err1 = (np.array(test_dft) - b1)/k1 - test_targets
+
+for xx, yy in zip(test_targets, list(err1)):
+    if xx < 0.0001:
+        metal_err_lst.append(abs(yy))
+    elif xx < 2:
+        smaller2_err_lst.append(abs(yy))
+    else:
+        bigger2_err_lst.append(abs(yy))
+    
+    all_err_lst.append(abs(yy))
+
+
+model.fit(test_x.reshape([-1,1]), test_y)
+k2 = model.coef_[0]
+b2 = model.intercept_[0]
+# k2, b2, r_value, p_value, std_err = stats.linregress(test_targets, test_dft)
+err2 = (np.array(target_dft) - b2)/k2 - targets['E1']
+
+for xx, yy in zip(targets['E1'], list(err2)):
+    if xx < 0.0001:
+        metal_err_lst.append(abs(yy))
+    elif xx < 2:
+        smaller2_err_lst.append(abs(yy))
+    else:
+        bigger2_err_lst.append(abs(yy))
+    
+    all_err_lst.append(abs(yy))
+
+
+print(k1, b1)
+print(k2, b2)
+# print(err1, err2)
 
 metal_err_lst, smaller2_err_lst, bigger2_err_lst, all_err_lst = np.array(metal_err_lst), np.array(smaller2_err_lst), np.array(bigger2_err_lst), np.array(all_err_lst)
 
@@ -345,48 +293,4 @@ print('MAE of metal, <2, >=2 and all', np.mean(metal_err_lst), np.mean(smaller2_
 print('std of metal, <2, >=2 and all', np.std(metal_err_lst), np.std(smaller2_err_lst), np.std(bigger2_err_lst), np.std(all_err_lst))
 
 
-# plot
-a, b, r_value, p_value, std_err = stats.linregress(xxx, yyy)
 
-s = np.linspace(0, 12, 2)
-ax.plot(s, s*a+b, "r:", label=f"k={a: .2f}; b={b: .2f}", color='red')
-ax.set_ylabel(f"Model output band gap (eV)")
-ax.set_xlabel(f"Experimental band gap (eV)")
-ax.legend()
-
-plt.subplots_adjust(bottom=0.125, right=0.978, left=0.105, top=0.973)
-# plt.show()
-
-# mae = prediction(cur_model, s_exp_disordered, t_exp_disordered)
-# logging.info('Disordered structures MAE of {tag} is: {mae}'.format(tag=old_model_name, mae=mae))
-
-zzz = np.array(xxx) - np.array(yyy)
-
-# dump in csv format
-import pandas as pd
-dict = {'icsd': all_icsd, 'exp_target': xxx, 'model_output': yyy, 'Abs. Err.': list(np.abs(zzz))}
-df = pd.DataFrame(dict)
-df.to_csv(old_model_name_0 + '_MAE_' + str(np.mean(all_err_lst)) +'.csv')
-
-import seaborn as sns
-import numpy as np
-
-plt.figure(1)
-fig1, ax1 = plt.subplots()
-
-sns.distplot(zzz, ax=ax1, hist=True, kde=True)
-
-ax1.set_xlim((-3, 3))
-ax1.set_yticks([])
-# ax1.get_yaxis().set_visible(False)
-ax1.set_ylabel('Gaussian kernel density (arb. units)')
-ax1.set_xlabel('Error on band gap (eV)')
-
-# from matplotlib.offsetbox import AnchoredText
-# anchored_text = AnchoredText(r"$\mathrm{\mu: " + str(round(np.mean(zzz), 3)) + '\n' + r" \sigma: " + str(round(np.std(zzz), 3)) + r"}$", loc=2)
-# ax1.add_artist(anchored_text)
-
-plt.annotate(r"$\mathrm{\mu: }$" + str(round(np.mean(zzz), 3)) + "\n" + r"$\mathrm{\sigma: }$" + str(round(np.std(zzz), 3)), xy=(0.05, 0.85), xycoords='axes fraction')
-# fig1.legend(labels=[r"$\mathrm{\mu: " + str(round(np.mean(zzz), 3)) + r'\\' + r" \sigma: " + str(round(np.std(zzz), 3)) + r"}$"])
-plt.subplots_adjust(bottom=0.13, right=0.978, left=0.052, top=0.985)
-plt.show()
