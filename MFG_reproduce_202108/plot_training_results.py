@@ -113,7 +113,15 @@ def plot_output_exp_err(model, structures, targets, ax, k, b):
     ax.set_ylim([0, 12])
     ax.plot([0, 1], [0, 1], 'k--', transform=ax.transAxes)
 
-    a, b, r_value, p_value, std_err = stats.linregress(targets, output_lst)
+    # a, b, r_value, p_value, std_err = stats.linregress(targets, output_lst)
+
+    linear_model = SGDRegressor(loss="epsilon_insensitive", epsilon=0)
+    x = np.array(targets)
+    y = np.array(output_lst)
+    linear_model.fit(x.reshape([-1,1]),y)
+    a = linear_model.coef_[0]
+    b = linear_model.intercept_[0]
+
     print("k, b: ", a, b)
 
         
@@ -237,16 +245,16 @@ zero_cnt_2 = 0
 for i in r:
     sp_lst.extend(list(set(s_exp[i].species)))
     if random.random() > 0.5:
-        if icsd_mpid_mapping["icsd-{0}".format(s_icsd[i])] not in list(df_ge["mp_id"]):
-            continue
+        # if icsd_mpid_mapping["icsd-{0}".format(s_icsd[i])] not in list(df_he["mp_id"]):
+        #     continue
         structures['E1'].append(s_exp[i])
         icsd_1.append(s_icsd[i])
         targets['E1'].append(t_exp[i])
         if t_exp[i] == 0:
             zero_cnt_1 += 1
     else:
-        if icsd_mpid_mapping["icsd-{0}".format(s_icsd[i])] not in list(df_ge["mp_id"]):
-            continue
+        # if icsd_mpid_mapping["icsd-{0}".format(s_icsd[i])] not in list(df_he["mp_id"]):
+        #     continue
         test_structures.append(s_exp[i])
         icsd_2.append(s_icsd[i])
         test_targets.append(t_exp[i])
@@ -314,12 +322,18 @@ cur_model_1 = MEGNetModel.from_file(old_model_name_1)
 import matplotlib.pyplot as plt
 plt.figure(0)
 from scipy import stats
+from sklearn.linear_model import SGDRegressor
+linear_model = SGDRegressor(loss="epsilon_insensitive", epsilon=0)
+
 font = {'size': 16, 'family': 'Arial'}
 plt.rc('font', **font)
 plt.rcParams['mathtext.rm'] = 'Arial'
 plt.rcParams['pdf.fonttype'] = 42
 
 fig, ax = plt.subplots()
+
+# k, b:  0.9459395727719193 -0.0005211859482731303
+# k, b:  0.955374231686202 -0.0070375697358804334
 
 plot_output_exp_err(cur_model_0, test_structures, test_targets, ax, 1, 0)
 plot_output_exp_err(cur_model_1, structures['E1'], targets['E1'], ax, 1, 0)
@@ -346,7 +360,12 @@ print('std of metal, <2, >=2 and all', np.std(metal_err_lst), np.std(smaller2_er
 
 
 # plot
-a, b, r_value, p_value, std_err = stats.linregress(xxx, yyy)
+# a, b, r_value, p_value, std_err = stats.linregress(xxx, yyy)
+x = np.array(xxx)
+y = np.array(yyy)
+linear_model.fit(x.reshape([-1,1]),y)
+a = linear_model.coef_[0]
+b = linear_model.intercept_[0]
 
 s = np.linspace(0, 12, 2)
 ax.plot(s, s*a+b, "r:", label=f"k={a: .2f}; b={b: .2f}", color='red')
