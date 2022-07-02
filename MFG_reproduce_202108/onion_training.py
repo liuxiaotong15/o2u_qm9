@@ -34,7 +34,7 @@ if training_mode in [0, 1]:
     # special_path = 'init_randomly_EGPHS_EGPH_EGP_EG_E'  # worst1
     # special_path = 'init_randomly_EGPHS_EPHS_EPH_EH_E'  # better
     special_path = 'init_randomly_EGPHS_EPHS_EHS_EH_E'  # best
-    last_commit_id = '223d078'
+    last_commit_id = ''
     if training_mode == 0:
         old_model_name = last_commit_id + '_0_123_' + special_path + '.hdf5'
         GPU_device = "0"
@@ -45,8 +45,10 @@ if training_mode in [0, 1]:
         pass
 
 
-tau_dict = {'pbe': 1.34, 'hse': 1.01, 'scan': 1.01, 'gllb-sc': 0.79} # P, H, S, G # min(MSE)
-tau_dict_b = {'pbe': 0.0, 'hse': 0.0, 'scan': 0.52, 'gllb-sc': 0.1} # P, H, S, G # min(MSE)
+tau_dict = {'pbe': (0.6537+0.6386)/2, 'hse': (0.8533+0.8079)/2, 'scan': (0.6935+0.6872)/2, 'gllb-sc': (1.0268+1.1013)/2} # P, H, S, G # min(MAE)
+# tau_dict = {'pbe': 1.34, 'hse': 1.01, 'scan': 1.01, 'gllb-sc': 0.79} # P, H, S, G # min(MSE)
+# tau_dict_b = {'pbe': 0.0, 'hse': 0.0, 'scan': 0.52, 'gllb-sc': 0.1} # P, H, S, G # min(MSE)
+tau_dict_b = {'pbe': 0.0, 'hse': (0.0023+0.0016)/2, 'scan': (0.0674+0.1343)/2, 'gllb-sc': (0.4985+0.3360)/2} # P, H, S, G # min(MAE)
 
 # tau_dict = {'pbe': 1/0.6279685889089127,
 #             'hse': 1/0.7774483582697933,
@@ -147,7 +149,7 @@ for it in items:
         structures[it].append(tmp)
         sp_lst.extend(list(set(structures[it][-1].species)))
         if tau_modify_enable:
-            targets[it].append(df[it+'_gap'][i] * tau_dict[it] + tau_dict_b[it])
+            targets[it].append((df[it+'_gap'][i]-tau_dict_b[it])/tau_dict[it])
         else:
             targets[it].append(df[it+'_gap'][i])
     logging.info('dataset {item}, element dict: {d}'.format(item=it, d=Counter(sp_lst)))
