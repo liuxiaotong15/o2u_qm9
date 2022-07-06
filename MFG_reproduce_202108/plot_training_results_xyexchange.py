@@ -201,10 +201,10 @@ df_he = pd.read_csv("data/intersection/HE.csv")
 df_pe = pd.read_csv("data/intersection/PE.csv")
 df_se = pd.read_csv("data/intersection/SE.csv")
 df_ge = pd.read_csv("data/intersection/GE.csv")
-df_h = pd.read_csv("data/5set/H.csv")
-df_p = pd.read_csv("data/5set/P.csv")
-df_s = pd.read_csv("data/5set/S.csv")
-df_g = pd.read_csv("data/5set/G.csv")
+# df_h = pd.read_csv("data/5set/H.csv")
+# df_p = pd.read_csv("data/5set/P.csv")
+# df_s = pd.read_csv("data/5set/S.csv")
+# df_g = pd.read_csv("data/5set/G.csv")
 
 ### load exp data and shuffle
 
@@ -250,7 +250,7 @@ zero_cnt_2 = 0
 for i in r:
     sp_lst.extend(list(set(s_exp[i].species)))
     if random.random() > 0.5:
-        if icsd_mpid_mapping["icsd-{0}".format(s_icsd[i])] not in list(df_s["mp_id"]):
+        if icsd_mpid_mapping["icsd-{0}".format(s_icsd[i])] not in list(df_se["mp_id"]):
             continue
         structures['E1'].append(s_exp[i])
         icsd_1.append(s_icsd[i])
@@ -258,7 +258,7 @@ for i in r:
         if t_exp[i] == 0:
             zero_cnt_1 += 1
     else:
-        if icsd_mpid_mapping["icsd-{0}".format(s_icsd[i])] not in list(df_s["mp_id"]):
+        if icsd_mpid_mapping["icsd-{0}".format(s_icsd[i])] not in list(df_se["mp_id"]):
             continue
         test_structures.append(s_exp[i])
         icsd_2.append(s_icsd[i])
