@@ -29,6 +29,11 @@ tau_modify_enable = False
 
 trained_last_time = True
 
+# color = "#008000" # P
+# color = "#FFA500" # H
+# color = "#0000FF" # S
+color = "#FF0000" # G
+
 if training_mode in [0, 1]:
     swap_E1_test = bool(training_mode&1)
     # special_path = 'init_randomly_EGPHS_EGPH_EGP_EG_E'  # worst1
@@ -108,9 +113,9 @@ def plot_output_exp_err(model, structures, targets, ax, k, b):
         xxx.append(targets[i])
         yyy.append(model_output[0])
     
-    ax.scatter(output_lst, targets, c=["#0000FF"] * len(output_lst), alpha=0.5)
-    ax.set_xlim([0, 12])
-    ax.set_ylim([0, 12])
+    ax.scatter(output_lst, targets, c=[color] * len(output_lst), alpha=0.5)
+    ax.set_xlim([0, 13.5])
+    ax.set_ylim([0, 13.5])
     ax.plot([0, 1], [0, 1], 'k--', transform=ax.transAxes)
 
     # a, b, r_value, p_value, std_err = stats.linregress(targets, output_lst)
@@ -124,7 +129,33 @@ def plot_output_exp_err(model, structures, targets, ax, k, b):
 
     print("k, b: ", a, b)
 
-        
+def plot_dft_exp_err(model, mpids, targets, ax, k, b):
+    test_size = len(mpids)
+    test_size = len(targets)
+    output_lst = []
+    for i in range(test_size):
+        model_output = mpid_dft_mapping[mpids[i]]
+        model_output = (model_output-b)/k
+        output_lst.append(model_output)
+        xxx.append(targets[i])
+        yyy.append(model_output)
+    
+    ax.scatter(output_lst, targets, c=[color] * len(output_lst), alpha=0.5)
+    ax.set_xlim([0, 13.5])
+    ax.set_ylim([0, 13.5])
+    ax.plot([0, 1], [0, 1], 'k--', transform=ax.transAxes)
+
+    # a, b, r_value, p_value, std_err = stats.linregress(targets, output_lst)
+
+    linear_model = SGDRegressor(loss="epsilon_insensitive", epsilon=0)
+    x = np.array(targets)
+    y = np.array(output_lst)
+    linear_model.fit(y.reshape([-1,1]),x)
+    a = linear_model.coef_[0]
+    b = linear_model.intercept_[0]
+
+    print("k, b: ", a, b)
+       
 
 def prediction(model, structures, targets):
     MAE = 0
@@ -201,10 +232,16 @@ df_he = pd.read_csv("data/intersection/HE.csv")
 df_pe = pd.read_csv("data/intersection/PE.csv")
 df_se = pd.read_csv("data/intersection/SE.csv")
 df_ge = pd.read_csv("data/intersection/GE.csv")
-# df_h = pd.read_csv("data/5set/H.csv")
-# df_p = pd.read_csv("data/5set/P.csv")
-# df_s = pd.read_csv("data/5set/S.csv")
-# df_g = pd.read_csv("data/5set/G.csv")
+df_h = pd.read_csv("data/5set/H.csv")
+df_p = pd.read_csv("data/5set/P.csv")
+df_s = pd.read_csv("data/5set/S.csv")
+df_g = pd.read_csv("data/5set/G.csv")
+
+df_dft = df_g
+df_dft_e = df_ge
+mpid_dft_mapping = {}
+for i in range(len(df_dft)):
+    mpid_dft_mapping[df_dft["mp_id"][i]] = df_dft['gap'][i]
 
 ### load exp data and shuffle
 
@@ -245,23 +282,28 @@ targets['E1'] = []
 icsd_1 = []
 icsd_2 = []
 
+mpid1 = []
+mpid2 = []
+
 zero_cnt_1 = 0
 zero_cnt_2 = 0
 for i in r:
     sp_lst.extend(list(set(s_exp[i].species)))
     if random.random() > 0.5:
-        if icsd_mpid_mapping["icsd-{0}".format(s_icsd[i])] not in list(df_se["mp_id"]):
+        if icsd_mpid_mapping["icsd-{0}".format(s_icsd[i])] not in list(df_dft_e["mp_id"]):
             continue
         structures['E1'].append(s_exp[i])
         icsd_1.append(s_icsd[i])
+        mpid1.append(icsd_mpid_mapping["icsd-{0}".format(s_icsd[i])])
         targets['E1'].append(t_exp[i])
         if t_exp[i] == 0:
             zero_cnt_1 += 1
     else:
-        if icsd_mpid_mapping["icsd-{0}".format(s_icsd[i])] not in list(df_se["mp_id"]):
+        if icsd_mpid_mapping["icsd-{0}".format(s_icsd[i])] not in list(df_dft_e["mp_id"]):
             continue
         test_structures.append(s_exp[i])
         icsd_2.append(s_icsd[i])
+        mpid2.append(icsd_mpid_mapping["icsd-{0}".format(s_icsd[i])])
         test_targets.append(t_exp[i])
         if t_exp[i] == 0:
             zero_cnt_2 += 1
@@ -343,10 +385,16 @@ fig, ax = plt.subplots()
 plot_output_exp_err(cur_model_0, test_structures, test_targets, ax, 1, 0)
 plot_output_exp_err(cur_model_1, structures['E1'], targets['E1'], ax, 1, 0)
 
+# plot_dft_exp_err(cur_model_0, mpid2, test_targets, ax, 1, 0)
+# plot_dft_exp_err(cur_model_1, mpid1, targets['E1'], ax, 1, 0)
+ax.set_xlabel(f"Model output band gap (eV)")
+# ax.set_xlabel(f"DFT band gap (eV)")
+ax.set_ylabel(f"Experimental band gap (eV)")
+
 # analyze MAE of all, metal, and non-metal
 
 metal_err_lst, smaller2_err_lst, bigger2_err_lst, all_err_lst = [], [], [], []
-
+print("max xxx, yyy:", max(xxx), max(yyy))
 for xx, yy in zip(xxx, yyy):
     if xx < 0.0001:
         metal_err_lst.append(abs(xx-yy))
@@ -372,15 +420,13 @@ linear_model.fit(y.reshape([-1,1]), x)
 a = linear_model.coef_[0]
 b = linear_model.intercept_[0]
 
-s = np.linspace(0, 12, 2)
-ax.plot(s, s*a+b, "r:", label=f"k={a: .2f}; b={b: .2f}", c="#0000FF")
-ax.set_xlabel(f"Model output band gap (eV)")
-ax.set_ylabel(f"Experimental band gap (eV)")
+s = np.linspace(0, 14, 2)
+ax.plot(s, s*a+b, "r:", label=f"k={a: .2f}; b={b: .2f}", c=color)
 ax.text(10, 1.5, f"a={a:.2f}\nb={b:.2f}", size=15, rotation=0.,
      ha="center", va="center",
      bbox=dict(boxstyle="round",
                alpha=0.5,
-               fc="#0000FF",
+               fc=color,
                )
      )
 # ax.legend()
