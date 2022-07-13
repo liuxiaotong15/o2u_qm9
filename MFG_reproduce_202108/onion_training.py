@@ -25,7 +25,7 @@ predict_before_dataclean = False
 training_new_model = True
 contain_e1_in_every_node = False
 swap_E1_test = False
-tau_modify_enable = True
+tau_modify_enable = False
 
 trained_last_time = True
 
