@@ -33,7 +33,8 @@ if training_mode in [0, 1]:
     swap_E1_test = bool(training_mode&1)
     # special_path = 'init_randomly_EGPHS_EGPH_EGP_EG_E'  # worst1
     # special_path = 'init_randomly_EGPHS_EPHS_EPH_EH_E'  # better
-    special_path = 'init_randomly_EGPHS_EPHS_EHS_EH_E'  # best
+    # special_path = 'init_randomly_EGPHS_EPHS_EHS_EH_E'  # best
+    special_path = 'init_randomly_EGPHS'  # all together only
     last_commit_id = ''
     if training_mode == 0:
         old_model_name = last_commit_id + '_0_123_' + special_path + '.hdf5'
@@ -59,6 +60,7 @@ tau_dict_b = {'pbe': 0.0, 'hse': (0.0023+0.0016)/2, 'scan': (0.0674+0.1343)/2, '
 # items = ['gllb-sc', 'hse', 'scan', 'pbe']
 # items = ['gllb-sc', 'scan', 'hse', 'pbe']
 items = ['gllb-sc', 'pbe', 'scan', 'hse']
+fidelity_state_dict = {'gllb-sc': 4, 'pbe': 3, 'scan': 2, 'hse': 1}
 # items = ['pbe', 'scan', 'hse', 'gllb-sc']
 # items = ['pbe', 'hse']
 
@@ -145,7 +147,7 @@ for it in items:
     for i in r:
         tmp = Structure.from_str(df[it+'_structure'][i], fmt='cif')
         tmp.remove_oxidation_states()
-        tmp.state=[0]
+        tmp.state=[fidelity_state_dict[it]]
         structures[it].append(tmp)
         sp_lst.extend(list(set(structures[it][-1].species)))
         if tau_modify_enable:
@@ -340,13 +342,13 @@ def find_sub_tree(cur_tag, history_tag):
     else:
         pass
         
-pbe_energy = prediction(model, structures['pbe'], targets['pbe'])
-ordered_energy = prediction(model, test_structures, test_targets)
-disordered_energy = prediction(model, s_exp_disordered, t_exp_disordered)
-
-logging.info('Prediction before trainnig, MAE of \
-        pbe: {pbe}; ordered: {ordered}; disordered: {disordered}.'.format(
-    pbe=pbe_energy, ordered=ordered_energy, disordered=disordered_energy))
+# pbe_energy = prediction(model, structures['pbe'], targets['pbe'])
+# ordered_energy = prediction(model, test_structures, test_targets)
+# disordered_energy = prediction(model, s_exp_disordered, t_exp_disordered)
+# 
+# logging.info('Prediction before trainnig, MAE of \
+#         pbe: {pbe}; ordered: {ordered}; disordered: {disordered}.'.format(
+#     pbe=pbe_energy, ordered=ordered_energy, disordered=disordered_energy))
 
 find_sub_tree(init_model_tag, 'init_randomly')
 
